@@ -163,39 +163,54 @@ plt.plot(portfolio_value_benchmark, label="Passive")
 plt.legend()
 plt.show()
 
-
-
-
-### Optimization
-
+#######OPTIMIZACIÓN
 import optuna
+
+
 def create_signals(data: pd.DataFrame, **kwargs):
     data = data.copy()
 
     rsi_1 = ta.momentum.RSIIndicator(data.Close, kwargs["rsi_window"])
-    data["rsi"] = rsi_1.rsi()
+    data["RSI"] = rsi_1.rsi()
 
     bollinger = ta.volatility.BollingerBands(data.Close,
                                              window=kwargs["bollinger_window"],
                                              window_dev=kwargs["bollinger_std"])
+    data["Bollinger Low"] = bollinger.bollinger_lband()
+    data["Bollinger High"] = bollinger.bollinger_hband()
 
     macd = ta.trend.MACD(data.Close, window_slow=kwargs["macd_slow_window"],
                          window_fast=kwargs["macd_fast_window"],
                          window_sign=kwargs["macd_sign_window"])
+    data["MACD"] = macd.macd()
+    data["MACD Signal"] = macd.macd_signal()
+
     atr = ta.volatility.AverageTrueRange(high=data.High, low=data.Low, close=data.Close,
                                          window=kwargs["atr_window"])
+    data["ATR"] = atr.average_true_range()
 
-    data["BUY_SIGNAL"] = (data["rsi"] < kwargs["rsi_lower_threshold"])
-    data["BUY_SIGNAL"] = data["BUY_SIGNAL"] & bollinger.bollinger_lband_indicator().astype(bool)
-    data["SELL_SIGNAL"] = (data["rsi"] > kwargs["rsi_lower_threshold"])
+    # Define BUY signals (BUY_SIGNAL)
+    data["BUY_SIGNAL"] = (data.RSI < kwargs["rsi_lower_threshold"])
+    data["BUY_SIGNAL"] |= (
+                data.Close < data["Bollinger Low"])  # Buy signal when the price is below the lower Bollinger band
+    data["BUY_SIGNAL"] |= (data.MACD > 0)  # Buy signal when MACD is positive
+    data["BUY_SIGNAL"] |= (data.ATR > data.ATR.mean())  # Buy signal when ATR is above its mean
+
+    # Define SELL signals (SELL_SIGNAL)
+    data["SELL_SIGNAL"] = (data.RSI > kwargs["rsi_upper_threshold"])
+    data["SELL_SIGNAL"] |= (
+                data.Close > data["Bollinger High"])  # Sell signal when the price is above the upper Bollinger band
+    data["SELL_SIGNAL"] |= (data.MACD < 0)  # Sell signal when MACD is negative
+    data["SELL_SIGNAL"] |= (data.ATR < data.ATR.mean())  # Sell signal when ATR is below its mean
+
     return data.dropna()
 
 
 def profit(trial):
     capital = 1_000_000
     n_shares = trial.suggest_int("n_shares", 50, 150)
-    stop_loss = trial.suggest_float("stop_loss", 0.05, 0.15)
-    take_profit = trial.suggest_float("take_profit", 0.05, 0.15)
+    stop_loss = trial.suggest_float("stop_loss", 0.05, 0.4)
+    take_profit = trial.suggest_float("take_profit", 0.05, 0.4)
 
     max_active_operations = 1000
     COM = 0.125 / 100
@@ -205,6 +220,7 @@ def profit(trial):
 
     rsi_window = trial.suggest_int("rsi_window", 5, 50)
     rsi_lower_threshold = trial.suggest_int("rsi_lower_threshold", 10, 30)
+    rsi_upper_threshold = trial.suggest_int("rsi_upper_threshold", 70, 90)
     bollinger_window = trial.suggest_int("bollinger_window", 5, 50)
     bollinger_std = 2  # Fixed value for Bollinger Bands standard deviation
     macd_slow_window = trial.suggest_int("macd_slow_window", 20, 40)
@@ -215,6 +231,7 @@ def profit(trial):
     technical_data = create_signals(data,
                                     rsi_window=rsi_window,
                                     rsi_lower_threshold=rsi_lower_threshold,
+                                    rsi_upper_threshold=rsi_upper_threshold,
                                     bollinger_window=bollinger_window,
                                     bollinger_std=bollinger_std,
                                     macd_slow_window=macd_slow_window,
@@ -222,18 +239,15 @@ def profit(trial):
                                     macd_sign_window=macd_sign_window,
                                     atr_window=atr_window)
 
-    # Backtesting
     for i, row in technical_data.iterrows():
         # Close all positions that are above/under tp or sl
         active_pos_copy = active_positions.copy()
         for pos in active_pos_copy:
             if pos["type"] == "LONG":
                 if row.Close < pos["stop_loss"]:
-                    # LOSS
                     capital += row.Close * pos["n_shares"] * (1 - COM)
                     active_positions.remove(pos)
                 if row.Close > pos["take_profit"]:
-                    # PROFIT
                     capital += row.Close * pos["n_shares"] * (1 - COM)
                     active_positions.remove(pos)
             elif pos["type"] == "SHORT":
@@ -246,7 +260,6 @@ def profit(trial):
 
         # Check if trading signal is True
         if row.BUY_SIGNAL and len(active_positions) < max_active_operations:
-            # Check if we have enough cash
             if capital > row.Close * (1 + COM) * n_shares:
                 capital -= row.Close * (1 + COM) * n_shares
                 active_positions.append({
@@ -256,23 +269,24 @@ def profit(trial):
                     "stop_loss": row.Close * (1 - stop_loss),
                     "take_profit": row.Close * (1 + take_profit)
                 })
-                # Check if short selling signal is True
-            if row.SELL_SIGNAL and len(active_positions) < max_active_operations:
-                if capital > row.Close * (1 + COM) * n_shares * 1.5:
-                    capital -= row.Close * (COM) * n_shares
-                    active_positions.append({
-                        "type": "SHORT",
-                        "sold_at": row.Close,
-                        "n_shares": n_shares,
-                        "stop_loss": row.Close * (1 + stop_loss),
-                        "take_profit": row.Close * (1 - take_profit)
-                    })
 
-            # Portfolio value through time
-            positions_value = len(active_positions) * n_shares * row.Close
-            portfolio_value.append(capital + positions_value)
+        # Check if short selling signal is True
+        if row.SELL_SIGNAL and len(active_positions) < max_active_operations:
+            if capital > row.Close * (1 + COM) * n_shares * 1.5:
+                capital -= row.Close * (COM) * n_shares
+                active_positions.append({
+                    "type": "SHORT",
+                    "sold_at": row.Close,
+                    "n_shares": n_shares,
+                    "stop_loss": row.Close * (1 + stop_loss),
+                    "take_profit": row.Close * (1 - take_profit)
+                })
 
-    # Close all positions that are above/under tp or sl
+        positions_value = sum(
+            [(pos["bought_at"] if pos["type"] == "LONG" else pos["sold_at"] - row.Close) * pos["n_shares"] for pos in
+             active_positions])
+        portfolio_value.append(capital + positions_value)
+
     for pos in active_positions.copy():
         if pos["type"] == "LONG":
             capital += row.Close * pos["n_shares"] * (1 - COM)
@@ -283,7 +297,9 @@ def profit(trial):
     portfolio_value.append(capital)
     return portfolio_value[-1]
 
-study = optuna.create_study(direction='maximize')
-study.optimize(func=profit, n_trials=1)
-study.best_params
 
+# Assuming 'data' is a pre-loaded DataFrame with your market data
+study = optuna.create_study(direction='maximize')
+study.optimize(func=profit, n_trials=10)
+
+study.best_params
