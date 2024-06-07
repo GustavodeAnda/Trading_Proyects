@@ -30,10 +30,17 @@ for ax in axs:
     ax.legend()
 plt.show()
 
+### Define BUY_SIGNAL based on various indicators
 technical_data["BUY_SIGNAL"] = (technical_data.RSI < 31)
-#technical_data["BUY_SIGNAL"] = (technical_data.MACD > 0)  # Example: buy signal when MACD is positive
-#technical_data["BUY_SIGNAL"] = (technical_data.Close < technical_data["Bollinger Low"])  # Example: buy signal when price is below the lower Bollinger band
-#technical_data["BUY_SIGNAL"] = (technical_data.ATR > technical_data.ATR.mean())  # Example: buy signal when ATR is above its mean
+technical_data["BUY_SIGNAL"] = (technical_data.MACD > 0)  # Example: buy signal when MACD is positive
+technical_data["BUY_SIGNAL"] = (technical_data.Close < technical_data["Bollinger Low"])  # Example: buy signal when price is below the lower Bollinger band
+technical_data["BUY_SIGNAL"] = (technical_data.ATR > technical_data.ATR.mean())  # Example: buy signal when ATR is above its mean
+
+### Define SELL_SHORT_SIGNAL based on various indicators
+technical_data["SELL_SIGNAL"] = (technical_data.RSI > 70)
+technical_data["SELL_SIGNAL"] = (technical_data.MACD < 0)  # Example: short sell signal when MACD is negative
+technical_data["SELL_SIGNAL"] = (technical_data.Close > technical_data["Bollinger High"])  # Example: short sell signal when price is above the upper Bollinger band
+technical_data["SELL_SIGNAL"] = (technical_data.ATR < technical_data.ATR.mean())  # Example: short sell signal when ATR is below its mean
 
 ### BACKTESTING
 
