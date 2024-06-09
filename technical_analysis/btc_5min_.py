@@ -24,64 +24,19 @@ for i in range(1, len(indicators) + 1):
     all_combinations.extend(comb)
 
 # Evaluate all combinations of indicators for BTC
-# best_combination_btc = None
-# best_value_btc = -float("inf")
-#
-# for combination in all_combinations:
-#     study = optuna.create_study(direction='maximize')
-#     study.optimize(func=lambda trial: profit_calculator.profit(trial, data_btc, combination), n_trials=1)
-#
-#     print(f"Best parameters for combination {combination}: {study.best_params}")
-#     print(f"Best value for combination {combination}: {study.best_value}")
-#
-#     if study.best_value > best_value_btc:
-#         best_value_btc = study.best_value
-#         best_combination_btc = combination
-#
-# print(" ")
-# print(" ")
-# print(f"The best combination of indicators for BTC is: {best_combination_btc} with a value of: {best_value_btc}")
-#
-# best_outcome = dict()
-# best_outcome[best_combination_btc] = {"value" : best_value_btc, "combination" : study.best_value, 'combination' : study.best_value}
-
-# Evaluate all combinations of indicators for BTC
 best_combination_btc = None
 best_value_btc = -float("inf")
-best_params_btc = None
-
-# Diccionario para almacenar los mejores resultados para cada combinación
-results = {}
 
 for combination in all_combinations:
     study = optuna.create_study(direction='maximize')
     study.optimize(func=lambda trial: profit_calculator.profit(trial, data_btc, combination), n_trials=1)
 
-    best_params = study.best_params
-    best_value = study.best_value
+    print(f"Best parameters for combination {combination}: {study.best_params}")
+    print(f"Best value for combination {combination}: {study.best_value}")
 
-    print(f"Best parameters for combination {combination}: {best_params}")
-    print(f"Best value for combination {combination}: {best_value}")
-
-    # Guardar los resultados en el diccionario
-    results[combination] = {"params": best_params, "value": best_value}
-
-    if best_value > best_value_btc:
-        best_value_btc = best_value
+    if study.best_value > best_value_btc:
+        best_value_btc = study.best_value
         best_combination_btc = combination
-        best_params_btc = best_params
 
-print(" ")
-print(" ")
 print(f"The best combination of indicators for BTC is: {best_combination_btc} with a value of: {best_value_btc}")
-
-# Crear un diccionario con el mejor resultado
-best_outcome = {
-    "combination": best_combination_btc,
-    "value": best_value_btc,
-    "params": best_params_btc
-}
-
-print(f"Best outcome: {best_outcome}")
-
 
