@@ -34,8 +34,7 @@ for i in range(1, 2 ** len(indicators)):
             combo.append(indicators[j])
     all_combinations.append(combo)
 
-
-# Función para simular trading basado en una combinación de indicadores
+# Función para simular trading basado en una combinación de indicadores, incluyendo ventas en corto
 def simulate_trading(technical_data, combo):
     signals = pd.Series(index=technical_data.index, data=np.nan)
 
@@ -58,6 +57,7 @@ def simulate_trading(technical_data, combo):
     signals = signals.ffill().bfill()  # Forward and backward fill signals
     capital = 100000
     shares = 0
+    short_shares = 0
 
     for date, signal in signals.items():  # Cambiado a .items()
         if signal == 'buy' and capital >= technical_data.at[date, 'Close']:
@@ -66,10 +66,15 @@ def simulate_trading(technical_data, combo):
         elif signal == 'sell' and shares > 0:
             capital += shares * technical_data.at[date, 'Close']
             shares = 0
+        elif signal == 'sell' and capital >= technical_data.at[date, 'Close']:
+            short_shares = capital // technical_data.at[date, 'Close']
+            capital += short_shares * technical_data.at[date, 'Close']
+        elif signal == 'buy' and short_shares > 0:
+            capital -= short_shares * technical_data.at[date, 'Close']
+            short_shares = 0
 
-    portfolio_value = capital + shares * technical_data.iloc[-1]['Close']
+    portfolio_value = capital + shares * technical_data.iloc[-1]['Close'] - short_shares * technical_data.iloc[-1]['Close']
     return portfolio_value
-
 
 # Repetir el proceso de simulación 100 veces
 all_results = []

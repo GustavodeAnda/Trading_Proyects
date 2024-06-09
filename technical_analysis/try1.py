@@ -39,7 +39,7 @@ for i in range(1, 2 ** len(indicators)):
             combo.append(indicators[j])
     all_combinations.append(combo)
 
-# Función para simular trading basado en una combinación de indicadores
+# Función para simular trading basado en una combinación de indicadores, incluyendo ventas en corto
 def simulate_trading(technical_data, combo):
     signals = pd.Series(index=technical_data.index, data=np.nan)
 
@@ -62,16 +62,23 @@ def simulate_trading(technical_data, combo):
     signals = signals.ffill().bfill()  # Forward and backward fill signals
     capital = 100000
     shares = 0
+    short_shares = 0
 
-    for date, signal in signals.items():  # Cambiado a .items()
+    for date, signal in signals.items():
         if signal == 'buy' and capital >= technical_data.at[date, 'Close']:
             shares = capital // technical_data.at[date, 'Close']
             capital -= shares * technical_data.at[date, 'Close']
         elif signal == 'sell' and shares > 0:
             capital += shares * technical_data.at[date, 'Close']
             shares = 0
+        elif signal == 'sell' and capital >= technical_data.at[date, 'Close']:
+            short_shares = capital // technical_data.at[date, 'Close']
+            capital += short_shares * technical_data.at[date, 'Close']
+        elif signal == 'buy' and short_shares > 0:
+            capital -= short_shares * technical_data.at[date, 'Close']
+            short_shares = 0
 
-    portfolio_value = capital + shares * technical_data.iloc[-1]['Close']
+    portfolio_value = capital + shares * technical_data.iloc[-1]['Close'] - short_shares * technical_data.iloc[-1]['Close']
     return portfolio_value
 
 # Repetir el proceso de simulación 100 veces
@@ -110,16 +117,16 @@ plt.tight_layout()
 plt.show()
 
 ### Define BUY_SIGNAL based on various indicators
-technical_data["BUY_SIGNAL"] = (technical_data.RSI < 31)
-technical_data["BUY_SIGNAL"] = (technical_data.MACD > 0)  # Example: buy signal when MACD is positive
-technical_data["BUY_SIGNAL"] = (technical_data.Close < technical_data["Bollinger Low"])  # Example: buy signal when price is below the lower Bollinger band
-technical_data["BUY_SIGNAL"] = (technical_data.ATR > technical_data.ATR.mean())  # Example: buy signal when ATR is above its mean
+technical_data["BUY_SIGNAL"] = (technical_data.RSI < 31).astype(int)
+technical_data["BUY_SIGNAL"] |= (technical_data.MACD > 0).astype(int)  # Example: buy signal when MACD is positive
+technical_data["BUY_SIGNAL"] |= (technical_data.Close < technical_data["Bollinger Low"]).astype(int)  # Example: buy signal when price is below the lower Bollinger band
+technical_data["BUY_SIGNAL"] |= (technical_data.ATR > technical_data.ATR.mean()).astype(int)  # Example: buy signal when ATR is above its mean
 
 ### Define SELL_SHORT_SIGNAL based on various indicators
-technical_data["SELL_SIGNAL"] = (technical_data.RSI > 70)
-technical_data["SELL_SIGNAL"] = (technical_data.MACD < 0)  # Example: short sell signal when MACD is negative
-technical_data["SELL_SIGNAL"] = (technical_data.Close > technical_data["Bollinger High"])  # Example: short sell signal when price is above the upper Bollinger band
-technical_data["SELL_SIGNAL"] = (technical_data.ATR < technical_data.ATR.mean())  # Example: short sell signal when ATR is below its mean
+technical_data["SELL_SIGNAL"] = (technical_data.RSI > 70).astype(int)
+technical_data["SELL_SIGNAL"] |= (technical_data.MACD < 0).astype(int)  # Example: short sell signal when MACD is negative
+technical_data["SELL_SIGNAL"] |= (technical_data.Close > technical_data["Bollinger High"]).astype(int)  # Example: short sell signal when price is above the upper Bollinger band
+technical_data["SELL_SIGNAL"] |= (technical_data.ATR < technical_data.ATR.mean()).astype(int)  # Example: short sell signal when ATR is below its mean
 
 ### BACKTESTING
 
@@ -188,7 +195,7 @@ plt.show()
 
 ## Short Selling
 # Señal de venta basada en el RSI
-technical_data["SELL_SIGNAL"] = (technical_data.RSI > 75)
+technical_data["SELL_SIGNAL"] = (technical_data.RSI > 75).astype(int)
 
 capital = 1_000_000
 n_shares = 100
@@ -272,18 +279,16 @@ def create_signals(data: pd.DataFrame, **kwargs):
     data["ATR"] = atr.average_true_range()
 
     # Define BUY signals (BUY_SIGNAL)
-    data["BUY_SIGNAL"] = (data.RSI < kwargs["rsi_lower_threshold"])
-    data["BUY_SIGNAL"] |= (
-                data.Close < data["Bollinger Low"])  # Buy signal when the price is below the lower Bollinger band
-    data["BUY_SIGNAL"] |= (data.MACD > 0)  # Buy signal when MACD is positive
-    data["BUY_SIGNAL"] |= (data.ATR > data.ATR.mean())  # Buy signal when ATR is above its mean
+    data["BUY_SIGNAL"] = (data.RSI < kwargs["rsi_lower_threshold"]).astype(int)
+    data["BUY_SIGNAL"] |= (data.Close < data["Bollinger Low"]).astype(int)  # Buy signal when the price is below the lower Bollinger band
+    data["BUY_SIGNAL"] |= (data.MACD > 0).astype(int)  # Buy signal when MACD is positive
+    data["BUY_SIGNAL"] |= (data.ATR > data.ATR.mean()).astype(int)  # Buy signal when ATR is above its mean
 
     # Define SELL signals (SELL_SIGNAL)
-    data["SELL_SIGNAL"] = (data.RSI > kwargs["rsi_upper_threshold"])
-    data["SELL_SIGNAL"] |= (
-                data.Close > data["Bollinger High"])  # Sell signal when the price is above the upper Bollinger band
-    data["SELL_SIGNAL"] |= (data.MACD < 0)  # Sell signal when MACD is negative
-    data["SELL_SIGNAL"] |= (data.ATR < data.ATR.mean())  # Sell signal when ATR is below its mean
+    data["SELL_SIGNAL"] = (data.RSI > kwargs["rsi_upper_threshold"]).astype(int)
+    data["SELL_SIGNAL"] |= (data.Close > data["Bollinger High"]).astype(int)  # Sell signal when the price is above the upper Bollinger band
+    data["SELL_SIGNAL"] |= (data.MACD < 0).astype(int)  # Sell signal when MACD is negative
+    data["SELL_SIGNAL"] |= (data.ATR < data.ATR.mean()).astype(int)  # Sell signal when ATR is below its mean
 
     return data.dropna()
 
@@ -383,4 +388,3 @@ study = optuna.create_study(direction='maximize')
 study.optimize(func=profit, n_trials=10)
 
 print("Best parameters:", study.best_params)
-
