@@ -40,6 +40,7 @@ for i in range(1, len(indicators) + 1):
 #
 # print(f"The best combination of indicators for BTC is: {best_combination_btc} with a value of: {best_value_btc}")
 #
+
 # Evaluate all combinations of indicators for BTC
 best_combination_btc = None
 best_value_btc = -float("inf")
