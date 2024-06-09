@@ -1,18 +1,36 @@
 import pandas as pd
 import ta
 
+def calculate_rsi(data: pd.DataFrame, window: int) -> pd.Series:
+    return ta.momentum.RSIIndicator(close=data["Close"], window=window).rsi()
+
+def calculate_macd(data: pd.DataFrame, slow: int, fast: int, sign: int) -> pd.DataFrame:
+    macd = ta.trend.MACD(close=data["Close"], window_slow=slow, window_fast=fast, window_sign=sign)
+    return pd.DataFrame({
+        "MACD": macd.macd(),
+        "MACD Signal": macd.macd_signal()
+    })
+
+def calculate_bollinger_bands(data: pd.DataFrame, window: int, window_dev: int) -> pd.DataFrame:
+    bollinger = ta.volatility.BollingerBands(close=data["Close"], window=window, window_dev=window_dev)
+    return pd.DataFrame({
+        "Bollinger High": bollinger.bollinger_hband(),
+        "Bollinger Low": bollinger.bollinger_lband(),
+        "BOLL": bollinger.bollinger_hband() - bollinger.bollinger_lband()
+    })
+
+def calculate_atr(data: pd.DataFrame, window: int) -> pd.Series:
+    return ta.volatility.AverageTrueRange(high=data["High"], low=data["Low"], close=data["Close"], window=window).average_true_range()
+
 def calculate_indicators(data: pd.DataFrame) -> pd.DataFrame:
     technical_data = pd.DataFrame()
     technical_data["Close"] = data["Close"]
-    technical_data["RSI"] = ta.momentum.RSIIndicator(close=data["Close"], window=48).rsi()
-    macd = ta.trend.MACD(close=data["Close"], window_slow=26, window_fast=12, window_sign=9)
-    technical_data["MACD"] = macd.macd()
-    technical_data["MACD Signal"] = macd.macd_signal()
-    bollinger = ta.volatility.BollingerBands(close=data["Close"], window=10, window_dev=2)
-    technical_data["Bollinger High"] = bollinger.bollinger_hband()
-    technical_data["Bollinger Low"] = bollinger.bollinger_lband()
-    technical_data["BOLL"] = technical_data["Bollinger High"] - technical_data["Bollinger Low"]
-    technical_data["ATR"] = ta.volatility.AverageTrueRange(high=data["High"], low=data["Low"], close=data["Close"], window=14).average_true_range()
+    technical_data["RSI"] = calculate_rsi(data, window=48)
+    macd_data = calculate_macd(data, slow=26, fast=12, sign=9)
+    technical_data = technical_data.join(macd_data)
+    bollinger_data = calculate_bollinger_bands(data, window=10, window_dev=2)
+    technical_data = technical_data.join(bollinger_data)
+    technical_data["ATR"] = calculate_atr(data, window=14)
     technical_data = technical_data.dropna()
     return technical_data
 

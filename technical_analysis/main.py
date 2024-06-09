@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import optuna
 import technical_analysis
 
-data_stock = pd.read_csv("./data/btc_project_train.csv").dropna()
+data_stock = pd.read_csv("./data/aapl_project_train.csv").dropna()
 data_btc = pd.read_csv("./data/btc_project_train.csv").dropna()
 
 # Calculation of technical indicators for stocks
@@ -67,4 +67,3 @@ study_btc = optuna.create_study(direction='maximize')
 study_btc.optimize(func=lambda trial: technical_analysis.profit(trial, data_btc, "btc"), n_trials=3)
 
 print("Best parameters for BTC:", study_btc.best_params)
-
