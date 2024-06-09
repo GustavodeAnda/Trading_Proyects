@@ -69,12 +69,12 @@ print(" ")
 print(f"The best combination of indicators for APPLE is: {best_combination_aapl} with a value of: {best_value_aapl}")
 
 # Crear un diccionario con el mejor resultado
-best_outcome = {
+best_outcome_apple_1min = {
     "combination": best_combination_aapl,
     "value": best_value_aapl,
     "params": best_params_aapl
 }
 
-print(f"Best outcome: {best_outcome}")
+print(f"Best outcome: {best_outcome_apple_1min}")
 
 

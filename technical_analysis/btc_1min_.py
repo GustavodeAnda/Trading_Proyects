@@ -71,10 +71,10 @@ print(" ")
 print(f"The best combination of indicators for BTC is: {best_combination_btc} with a value of: {best_value_btc}")
 
 # Crear un diccionario con el mejor resultado
-best_outcome = {
+best_outcome_btc_1min = {
     "combination": best_combination_btc,
     "value": best_value_btc,
     "params": best_params_btc
 }
 
-print(f"Best outcome: {best_outcome}")
+print(f"Best outcome: {best_outcome_btc_1min}")
