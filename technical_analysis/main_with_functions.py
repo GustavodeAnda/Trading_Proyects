@@ -312,7 +312,3 @@ study = optuna.create_study(direction='maximize')
 study.optimize(func=profit, n_trials=10)
 
 study.best_params
-
-
-
-
