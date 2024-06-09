@@ -48,7 +48,7 @@ results = {}
 
 for combination in all_combinations:
     study = optuna.create_study(direction='maximize')
-    study.optimize(func=lambda trial: profit_calculator.profit(trial, data_aapl, combination), n_trials=1)
+    study.optimize(func=lambda trial: profit_calculator.profit(trial, data_aapl, combination), n_trials=30)
 
     best_params = study.best_params
     best_value = study.best_value
