@@ -73,7 +73,7 @@ def simulate_trading(technical_data, combo):
 
 # Repetir el proceso de simulación 100 veces
 all_results = []
-for _ in range(100):
+for _ in range(10):
     results = []
     for combo in all_combinations:
         final_value = simulate_trading(technical_data, combo)
@@ -83,7 +83,7 @@ for _ in range(100):
 # Calcular estadísticas de los resultados
 average_results = []
 for i in range(len(all_combinations)):
-    combo_values = [all_results[j][i][1] for j in range(100)]
+    combo_values = [all_results[j][i][1] for j in range(10)]
     average_result = np.mean(combo_values)
     average_results.append((all_combinations[i], average_result))
 
