@@ -9,7 +9,7 @@ def profit(trial, data, indicators):
     # Check if we are dealing with BTC or AAPL
     if 'btc' in data.columns[0].lower():
         n_shares = trial.suggest_float("n_shares", 0.01, 10)  # Allow fractional shares for BTC
-        COM = 0.25 / 100
+        COM = 0.05 / 100
     else:
         n_shares = trial.suggest_int("n_shares", 1, 100)  # Allow only whole shares for AAPL
         COM = 0.125 / 100

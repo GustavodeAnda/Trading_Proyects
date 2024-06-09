@@ -7,6 +7,7 @@ import optuna
 
 # Load data
 data_btc = pd.read_csv("./data/btc_project_train.csv").dropna()
+data_btc = data_btc.rename(columns={data_btc.columns[0]: 'btc'})
 
 # Calculate technical indicators
 btc_technical_data = technical_analysis.calculate_technical_indicators(data_btc)
