@@ -78,3 +78,12 @@ best_outcome_btc_1min = {
 }
 
 print(f"Best outcome: {best_outcome_btc_1min}")
+
+
+import json
+# Creating a JSON to avoid unnecessary testing
+best_outcome_json = json.dumps(best_outcome_btc_1min, indent=4)
+
+# Saving file
+with open("best_outcome_btc_1min.txt", "w") as file:
+    file.write(best_outcome_json)
