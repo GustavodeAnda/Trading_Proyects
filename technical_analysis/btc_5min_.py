@@ -39,4 +39,4 @@ for combination in all_combinations:
         best_combination_btc = combination
 
 print(f"The best combination of indicators for BTC is: {best_combination_btc} with a value of: {best_value_btc}")
-
+#
