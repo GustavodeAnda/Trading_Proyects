@@ -281,7 +281,7 @@ def profit(trial):
 
         # Check if short selling signal is True
         if row.SELL_SIGNAL and len(active_positions) < max_active_operations:
-            if capital > row.Close * (1 + COM) * n_shares * 1.5:
+            if capital > row.Close * (1 + COM) * n_shares * 1.3:
                 capital -= row.Close * (COM) * n_shares
                 active_positions.append({
                     "type": "SHORT",
@@ -312,3 +312,7 @@ study = optuna.create_study(direction='maximize')
 study.optimize(func=profit, n_trials=10)
 
 study.best_params
+
+
+
+
