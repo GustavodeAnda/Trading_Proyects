@@ -1,5 +1,6 @@
 import pandas as pd
 import ta
+import matplotlib.pyplot as plt
 
 
 def calculate_rsi(data: pd.DataFrame, window: int) -> pd.Series:
@@ -73,11 +74,10 @@ def create_signals(data: pd.DataFrame, indicators: list, **kwargs) -> pd.DataFra
 
 def profit(trial, data, indicators):
     capital = 1_000_000
-    n_shares = trial.suggest_float("n_shares", 0.01, 10) if 'btc' in data.columns else trial.suggest_int("n_shares", 50,
-                                                                                                         150)
+    n_shares = trial.suggest_int("n_shares", 50, 150)
     stop_loss = trial.suggest_float("stop_loss", 0.05, 0.4)
     take_profit = trial.suggest_float("take_profit", 0.05, 0.4)
-    COM = 0.25 / 100 if 'btc' in data.columns else 0.125 / 100
+    COM = 0.125 / 100
     max_active_operations = 1000
 
     active_positions = []
@@ -157,3 +157,22 @@ def profit(trial, data, indicators):
 
     portfolio_value.append(capital)
     return portfolio_value[-1]
+
+
+def calculate_technical_indicators(data: pd.DataFrame) -> pd.DataFrame:
+    rsi = calculate_rsi(data, window=48)
+    macd = calculate_macd(data, slow=26, fast=12, sign=9)
+    bollinger = calculate_bollinger_bands(data, window=10, window_dev=2)
+    atr = calculate_atr(data, window=14)
+
+    technical_data = pd.DataFrame()
+    technical_data["Close"] = data["Close"]
+    technical_data["RSI"] = rsi
+    technical_data["MACD"] = macd["MACD"]
+    technical_data["MACD Signal"] = macd["MACD Signal"]
+    technical_data["BOLL"] = bollinger["BOLL"]
+    technical_data["Bollinger Low"] = bollinger["Bollinger Low"]
+    technical_data["Bollinger High"] = bollinger["Bollinger High"]
+    technical_data["ATR"] = atr
+
+    return technical_data.dropna()
