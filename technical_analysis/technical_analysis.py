@@ -1,8 +1,10 @@
 import pandas as pd
 import ta
 
+
 def calculate_rsi(data: pd.DataFrame, window: int) -> pd.Series:
     return ta.momentum.RSIIndicator(close=data["Close"], window=window).rsi()
+
 
 def calculate_macd(data: pd.DataFrame, slow: int, fast: int, sign: int) -> pd.DataFrame:
     macd = ta.trend.MACD(close=data["Close"], window_slow=slow, window_fast=fast, window_sign=sign)
@@ -10,6 +12,7 @@ def calculate_macd(data: pd.DataFrame, slow: int, fast: int, sign: int) -> pd.Da
         "MACD": macd.macd(),
         "MACD Signal": macd.macd_signal()
     })
+
 
 def calculate_bollinger_bands(data: pd.DataFrame, window: int, window_dev: int) -> pd.DataFrame:
     bollinger = ta.volatility.BollingerBands(close=data["Close"], window=window, window_dev=window_dev)
@@ -19,73 +22,86 @@ def calculate_bollinger_bands(data: pd.DataFrame, window: int, window_dev: int) 
         "BOLL": bollinger.bollinger_hband() - bollinger.bollinger_lband()
     })
 
+
 def calculate_atr(data: pd.DataFrame, window: int) -> pd.Series:
-    return ta.volatility.AverageTrueRange(high=data["High"], low=data["Low"], close=data["Close"], window=window).average_true_range()
+    return ta.volatility.AverageTrueRange(high=data["High"], low=data["Low"], close=data["Close"],
+                                          window=window).average_true_range()
 
-def calculate_indicators(data: pd.DataFrame) -> pd.DataFrame:
-    technical_data = pd.DataFrame()
-    technical_data["Close"] = data["Close"]
-    technical_data["RSI"] = calculate_rsi(data, window=48)
-    macd_data = calculate_macd(data, slow=26, fast=12, sign=9)
-    technical_data = technical_data.join(macd_data)
-    bollinger_data = calculate_bollinger_bands(data, window=10, window_dev=2)
-    technical_data = technical_data.join(bollinger_data)
-    technical_data["ATR"] = calculate_atr(data, window=14)
-    technical_data = technical_data.dropna()
-    return technical_data
 
-def create_signals(data: pd.DataFrame, **kwargs) -> pd.DataFrame:
+def create_signals(data: pd.DataFrame, indicators: list, **kwargs) -> pd.DataFrame:
     data = data.copy()
 
-    data["RSI"] = ta.momentum.RSIIndicator(close=data["Close"], window=kwargs["rsi_window"]).rsi()
-    bollinger = ta.volatility.BollingerBands(close=data["Close"], window=kwargs["bollinger_window"], window_dev=2)
-    data["Bollinger Low"] = bollinger.bollinger_lband()
-    data["Bollinger High"] = bollinger.bollinger_hband()
-    macd = ta.trend.MACD(close=data["Close"], window_slow=kwargs["macd_slow_window"], window_fast=kwargs["macd_fast_window"], window_sign=kwargs["macd_sign_window"])
-    data["MACD"] = macd.macd()
-    data["MACD Signal"] = macd.macd_signal()
-    data["ATR"] = ta.volatility.AverageTrueRange(high=data["High"], low=data["Low"], close=data["Close"], window=kwargs["atr_window"]).average_true_range()
+    if "RSI" in indicators:
+        data["RSI"] = calculate_rsi(data, kwargs["rsi_window"])
 
-    data["BUY_SIGNAL"] = (data.RSI < kwargs["rsi_lower_threshold"]) | (data.Close < data["Bollinger Low"]) | (data.MACD > 0) | (data.ATR > data.ATR.mean())
-    data["SELL_SIGNAL"] = (data.RSI > kwargs["rsi_upper_threshold"]) | (data.Close > data["Bollinger High"]) | (data.MACD < 0) | (data.ATR < data.ATR.mean())
+    if "MACD" in indicators:
+        macd_data = calculate_macd(data, slow=kwargs["macd_slow_window"], fast=kwargs["macd_fast_window"],
+                                   sign=kwargs["macd_sign_window"])
+        data = data.join(macd_data)
+
+    if "Bollinger Bands" in indicators:
+        bollinger_data = calculate_bollinger_bands(data, window=kwargs["bollinger_window"], window_dev=2)
+        data = data.join(bollinger_data)
+
+    if "ATR" in indicators:
+        data["ATR"] = calculate_atr(data, kwargs["atr_window"])
+
+    data["BUY_SIGNAL"] = False
+    data["SELL_SIGNAL"] = False
+
+    if "RSI" in indicators:
+        data["BUY_SIGNAL"] |= (data.RSI < kwargs["rsi_lower_threshold"])
+        data["SELL_SIGNAL"] |= (data.RSI > kwargs["rsi_upper_threshold"])
+
+    if "MACD" in indicators:
+        data["BUY_SIGNAL"] |= (data.MACD > 0)
+        data["SELL_SIGNAL"] |= (data.MACD < 0)
+
+    if "Bollinger Bands" in indicators:
+        data["BUY_SIGNAL"] |= (data.Close < data["Bollinger Low"])
+        data["SELL_SIGNAL"] |= (data.Close > data["Bollinger High"])
+
+    if "ATR" in indicators:
+        data["BUY_SIGNAL"] |= (data.ATR > data.ATR.mean())
+        data["SELL_SIGNAL"] |= (data.ATR < data.ATR.mean())
+
+    print(f"BUY_SIGNAL count: {data['BUY_SIGNAL'].sum()}")
+    print(f"SELL_SIGNAL count: {data['SELL_SIGNAL'].sum()}")
 
     return data.dropna()
 
-def profit(trial, data, asset_type="stock"):
-    capital = 1_000_000
-    if asset_type == "btc":
-        n_shares = trial.suggest_float("n_shares", 0.01, 10)
-        COM = 0.25 / 100
-    else:
-        n_shares = trial.suggest_int("n_shares", 50, 150)
-        COM = 0.125 / 100
 
+def profit(trial, data, indicators):
+    capital = 1_000_000
+    n_shares = trial.suggest_float("n_shares", 0.01, 10) if 'btc' in data.columns else trial.suggest_int("n_shares", 50,
+                                                                                                         150)
     stop_loss = trial.suggest_float("stop_loss", 0.05, 0.4)
     take_profit = trial.suggest_float("take_profit", 0.05, 0.4)
-
+    COM = 0.25 / 100 if 'btc' in data.columns else 0.125 / 100
     max_active_operations = 1000
 
     active_positions = []
     portfolio_value = [capital]
 
-    rsi_window = trial.suggest_int("rsi_window", 5, 50)
-    rsi_lower_threshold = trial.suggest_int("rsi_lower_threshold", 10, 30)
-    rsi_upper_threshold = trial.suggest_int("rsi_upper_threshold", 70, 90)
-    bollinger_window = trial.suggest_int("bollinger_window", 5, 50)
-    macd_slow_window = trial.suggest_int("macd_slow_window", 20, 40)
-    macd_fast_window = trial.suggest_int("macd_fast_window", 5, 20)
-    macd_sign_window = trial.suggest_int("macd_sign_window", 5, 20)
-    atr_window = trial.suggest_int("atr_window", 5, 20)
+    kwargs = {}
 
-    technical_data = create_signals(data,
-                                    rsi_window=rsi_window,
-                                    rsi_lower_threshold=rsi_lower_threshold,
-                                    rsi_upper_threshold=rsi_upper_threshold,
-                                    bollinger_window=bollinger_window,
-                                    macd_slow_window=macd_slow_window,
-                                    macd_fast_window=macd_fast_window,
-                                    macd_sign_window=macd_sign_window,
-                                    atr_window=atr_window)
+    if "RSI" in indicators:
+        kwargs["rsi_window"] = trial.suggest_int("rsi_window", 5, 50)
+        kwargs["rsi_lower_threshold"] = trial.suggest_int("rsi_lower_threshold", 10, 30)
+        kwargs["rsi_upper_threshold"] = trial.suggest_int("rsi_upper_threshold", 70, 90)
+
+    if "Bollinger Bands" in indicators:
+        kwargs["bollinger_window"] = trial.suggest_int("bollinger_window", 5, 50)
+
+    if "MACD" in indicators:
+        kwargs["macd_slow_window"] = trial.suggest_int("macd_slow_window", 20, 40)
+        kwargs["macd_fast_window"] = trial.suggest_int("macd_fast_window", 5, 20)
+        kwargs["macd_sign_window"] = trial.suggest_int("macd_sign_window", 5, 20)
+
+    if "ATR" in indicators:
+        kwargs["atr_window"] = trial.suggest_int("atr_window", 5, 20)
+
+    technical_data = create_signals(data, indicators=indicators, **kwargs)
 
     for i, row in technical_data.iterrows():
         active_pos_copy = active_positions.copy()

@@ -1,69 +1,79 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import optuna
+from itertools import combinations
 import technical_analysis
 
 data_stock = pd.read_csv("./data/aapl_project_train.csv").dropna()
 data_btc = pd.read_csv("./data/btc_project_train.csv").dropna()
 
-# Calculation of technical indicators for stocks
-technical_data_stock = technical_analysis.calculate_indicators(data_stock)
+# Generate all possible combinations of indicators
+indicators = ["RSI", "MACD", "Bollinger Bands", "ATR"]
+all_combinations = []
 
-# Calculation of technical indicators for BTC
-technical_data_btc = technical_analysis.calculate_indicators(data_btc)
+for i in range(1, len(indicators) + 1):
+    comb = combinations(indicators, i)
+    all_combinations.extend(comb)
 
-# Plot of the technical indicators for stocks
-fig, axs = plt.subplots(5, 1, figsize=(12, 18))
+# Evaluate all combinations of indicators for stocks
+best_combination_stock = None
+best_value_stock = -float("inf")
+
+for combination in all_combinations:
+    study = optuna.create_study(direction='maximize')
+    study.optimize(func=lambda trial: technical_analysis.profit(trial, data_stock, combination), n_trials=1)
+
+    print(f"Best parameters for combination {combination}: {study.best_params}")
+    print(f"Best value for combination {combination}: {study.best_value}")
+
+    if study.best_value > best_value_stock:
+        best_value_stock = study.best_value
+        best_combination_stock = combination
+
+print(f"The best combination of indicators for stocks is: {best_combination_stock} with a value of: {best_value_stock}")
+
+# Evaluate all combinations of indicators for BTC
+best_combination_btc = None
+best_value_btc = -float("inf")
+
+for combination in all_combinations:
+    study = optuna.create_study(direction='maximize')
+    study.optimize(func=lambda trial: technical_analysis.profit(trial, data_btc, combination), n_trials=1)
+
+    print(f"Best parameters for combination {combination}: {study.best_params}")
+    print(f"Best value for combination {combination}: {study.best_value}")
+
+    if study.best_value > best_value_btc:
+        best_value_btc = study.best_value
+        best_combination_btc = combination
+
+print(f"The best combination of indicators for BTC is: {best_combination_btc} with a value of: {best_value_btc}")
+
+# Plot technical indicators for the best combination for stocks
+technical_data_stock = technical_analysis.create_signals(data_stock, indicators=best_combination_stock,
+                                                         rsi_window=48, macd_slow_window=26, macd_fast_window=12,
+                                                         macd_sign_window=9,
+                                                         bollinger_window=10, atr_window=14)
+
+fig, axs = plt.subplots(len(best_combination_stock) + 1, 1, figsize=(12, 18))
 axs[0].plot(technical_data_stock["Close"], label="Close")
-axs[1].plot(technical_data_stock["RSI"], label="RSI")
-axs[2].plot(technical_data_stock["MACD"], label="MACD")
-axs[3].plot(technical_data_stock["BOLL"], label="BOLL")
-axs[4].plot(technical_data_stock["ATR"], label="ATR")
+for i, indicator in enumerate(best_combination_stock):
+    axs[i + 1].plot(technical_data_stock[indicator], label=indicator)
 for ax in axs:
     ax.legend()
 plt.show()
 
-# Plot of the technical indicators for BTC
-fig, axs = plt.subplots(5, 1, figsize=(12, 18))
+# Plot technical indicators for the best combination for BTC
+technical_data_btc = technical_analysis.create_signals(data_btc, indicators=best_combination_btc,
+                                                       rsi_window=48, macd_slow_window=26, macd_fast_window=12,
+                                                       macd_sign_window=9,
+                                                       bollinger_window=10, atr_window=14)
+
+fig, axs = plt.subplots(len(best_combination_btc) + 1, 1, figsize=(12, 18))
 axs[0].plot(technical_data_btc["Close"], label="Close")
-axs[1].plot(technical_data_btc["RSI"], label="RSI")
-axs[2].plot(technical_data_btc["MACD"], label="MACD")
-axs[3].plot(technical_data_btc["BOLL"], label="BOLL")
-axs[4].plot(technical_data_btc["ATR"], label="ATR")
+for i, indicator in enumerate(best_combination_btc):
+    axs[i + 1].plot(technical_data_btc[indicator], label=indicator)
 for ax in axs:
     ax.legend()
 plt.show()
 
-# definition:  buy and sell signals based on various indicators for stocks
-technical_data_stock["BUY_SIGNAL"] = (technical_data_stock.RSI < 31)
-technical_data_stock["BUY_SIGNAL"] &= (technical_data_stock.MACD > 0)
-technical_data_stock["BUY_SIGNAL"] &= (technical_data_stock.Close < technical_data_stock["Bollinger Low"])
-technical_data_stock["BUY_SIGNAL"] &= (technical_data_stock.ATR > technical_data_stock.ATR.mean())
-
-technical_data_stock["SELL_SIGNAL"] = (technical_data_stock.RSI > 70)
-technical_data_stock["SELL_SIGNAL"] &= (technical_data_stock.MACD < 0)
-technical_data_stock["SELL_SIGNAL"] &= (technical_data_stock.Close > technical_data_stock["Bollinger High"])
-technical_data_stock["SELL_SIGNAL"] &= (technical_data_stock.ATR < technical_data_stock.ATR.mean())
-
-# definition:  buy and sell signals based on various indicators for BTC
-technical_data_btc["BUY_SIGNAL"] = (technical_data_btc.RSI < 31)
-technical_data_btc["BUY_SIGNAL"] &= (technical_data_btc.MACD > 0)
-technical_data_btc["BUY_SIGNAL"] &= (technical_data_btc.Close < technical_data_btc["Bollinger Low"])
-technical_data_btc["BUY_SIGNAL"] &= (technical_data_btc.ATR > technical_data_btc.ATR.mean())
-
-technical_data_btc["SELL_SIGNAL"] = (technical_data_btc.RSI > 70)
-technical_data_btc["SELL_SIGNAL"] &= (technical_data_btc.MACD < 0)
-technical_data_btc["SELL_SIGNAL"] &= (technical_data_btc.Close > technical_data_btc["Bollinger High"])
-technical_data_btc["SELL_SIGNAL"] &= (technical_data_btc.ATR < technical_data_btc.ATR.mean())
-
-# Optimization stocks
-study_stock = optuna.create_study(direction='maximize')
-study_stock.optimize(func=lambda trial: technical_analysis.profit(trial, data_stock, "stock"), n_trials=3)
-
-print("Best parameters for stocks:", study_stock.best_params)
-
-# Optimization BTC
-study_btc = optuna.create_study(direction='maximize')
-study_btc.optimize(func=lambda trial: technical_analysis.profit(trial, data_btc, "btc"), n_trials=3)
-
-print("Best parameters for BTC:", study_btc.best_params)
