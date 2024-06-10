@@ -1,5 +1,0 @@
-{
-    "combination": null,
-    "value": -Infinity,
-    "params": null
-}

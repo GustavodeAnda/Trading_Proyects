@@ -1,7 +1,7 @@
 import ta
 import pandas as pd
 import matplotlib.pyplot as plt
-data = pd.read_csv("./data/aapl_project_1m_test.csv").dropna()
+data = pd.read_csv("./data/aapl_project_1m_train.csv").dropna()
 
 n_shares = 44
 stop_loss = 0.17466016271602947
