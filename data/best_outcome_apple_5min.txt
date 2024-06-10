@@ -1,0 +1,14 @@
+{
+    "combination": [
+        "RSI"
+    ],
+    "value": 1407753.0336074033,
+    "params": {
+        "n_shares": 93,
+        "stop_loss": 0.3797931715217154,
+        "take_profit": 0.2584377218497207,
+        "rsi_window": 33,
+        "rsi_lower_threshold": 30,
+        "rsi_upper_threshold": 81
+    }
+}
