@@ -83,6 +83,7 @@ def profit(trial, data, indicators):
                     "take_profit": row.Close * (1 - take_profit)
                 })
 
+
         positions_value = sum(
             [(pos["bought_at"] if pos["type"] == "LONG" else pos["sold_at"] - row.Close) * pos["n_shares"] for pos in
              active_positions])
