@@ -86,3 +86,67 @@
 2024-06-10 15:26:21,552 -  
 2024-06-10 15:26:21,552 - The best combination of indicators for APPLE is: ('RSI',) with a value of: 1094337.991346501
 2024-06-10 15:26:21,552 - Best outcome: {'combination': ('RSI',), 'value': 1094337.991346501, 'params': {'n_shares': 44, 'stop_loss': 0.17466016271602947, 'take_profit': 0.35114612061554595, 'rsi_window': 18, 'rsi_lower_threshold': 26, 'rsi_upper_threshold': 90}}
+2024-06-10 16:35:31,282 - Combination ('MACD',): Best parameters: {'n_shares': 18.97693678243583, 'stop_loss': 0.11938019737943861, 'take_profit': 0.08135925432975458, 'macd_slow_window': 40, 'macd_fast_window': 17, 'macd_sign_window': 16}
+2024-06-10 16:35:31,292 - Combination ('MACD',): Best value: 290609.64088527986
+2024-06-10 16:35:37,705 - Combination ('ATR',): Best parameters: {'n_shares': 13.729049875882435, 'stop_loss': 0.212902208151422, 'take_profit': 0.39026361262353526, 'atr_window': 12}
+2024-06-10 16:35:37,705 - Combination ('ATR',): Best value: 1740469.6907084202
+2024-06-10 16:35:57,227 - Combination ('Bollinger Bands', 'ATR'): Best parameters: {'n_shares': 19.7768109455081, 'stop_loss': 0.35744792098646405, 'take_profit': 0.3985380566024769, 'bollinger_window': 34, 'atr_window': 15}
+2024-06-10 16:35:57,227 - Combination ('Bollinger Bands', 'ATR'): Best value: 1671595.844802741
+2024-06-10 16:36:01,781 - Combination ('RSI', 'MACD', 'ATR'): Best parameters: {'n_shares': 16.932177812219006, 'stop_loss': 0.17015026817916656, 'take_profit': 0.3328260779360824, 'rsi_window': 34, 'rsi_lower_threshold': 10, 'rsi_upper_threshold': 83, 'macd_slow_window': 32, 'macd_fast_window': 12, 'macd_sign_window': 20, 'atr_window': 6}
+2024-06-10 16:36:01,781 - Combination ('RSI', 'MACD', 'ATR'): Best value: 1443492.7123188414
+2024-06-10 16:36:05,897 - Combination ('RSI', 'Bollinger Bands', 'ATR'): Best parameters: {'n_shares': 19.320425266759308, 'stop_loss': 0.2914978348843256, 'take_profit': 0.37146997868150305, 'rsi_window': 11, 'rsi_lower_threshold': 24, 'rsi_upper_threshold': 85, 'bollinger_window': 35, 'atr_window': 18}
+2024-06-10 16:36:05,898 - Combination ('RSI', 'Bollinger Bands', 'ATR'): Best value: 1635788.9806127197
+2024-06-10 16:36:13,817 - Combination ('MACD', 'Bollinger Bands', 'ATR'): Best parameters: {'n_shares': 19.94040444797851, 'stop_loss': 0.2952045317296642, 'take_profit': 0.25633316335481404, 'bollinger_window': 44, 'macd_slow_window': 38, 'macd_fast_window': 10, 'macd_sign_window': 14, 'atr_window': 20}
+2024-06-10 16:36:13,817 - Combination ('MACD', 'Bollinger Bands', 'ATR'): Best value: 1684979.4040042255
+2024-06-10 16:36:18,489 - Combination ('RSI', 'MACD'): Best parameters: {'n_shares': 19.7888587387473, 'stop_loss': 0.2114416416593569, 'take_profit': 0.3065553002501873, 'rsi_window': 6, 'rsi_lower_threshold': 30, 'rsi_upper_threshold': 75, 'macd_slow_window': 21, 'macd_fast_window': 5, 'macd_sign_window': 14}
+2024-06-10 16:36:18,489 - Combination ('RSI', 'MACD'): Best value: 1669879.8963859207
+2024-06-10 16:36:28,157 - Combination ('MACD', 'ATR'): Best parameters: {'n_shares': 19.827901022189145, 'stop_loss': 0.2646121966201176, 'take_profit': 0.39845707588148943, 'macd_slow_window': 23, 'macd_fast_window': 13, 'macd_sign_window': 7, 'atr_window': 11}
+2024-06-10 16:36:28,157 - Combination ('MACD', 'ATR'): Best value: 1691329.8087602123
+2024-06-10 16:36:29,074 - Combination ('MACD', 'Bollinger Bands'): Best parameters: {'n_shares': 18.807061122994785, 'stop_loss': 0.39622254428899806, 'take_profit': 0.38161299269042226, 'bollinger_window': 50, 'macd_slow_window': 31, 'macd_fast_window': 17, 'macd_sign_window': 14}
+2024-06-10 16:36:29,074 - Combination ('MACD', 'Bollinger Bands'): Best value: 1677596.984651485
+2024-06-10 16:36:37,820 - Combination ('RSI', 'MACD', 'Bollinger Bands', 'ATR'): Best parameters: {'n_shares': 19.99469852985981, 'stop_loss': 0.34912764629836635, 'take_profit': 0.19180700382867552, 'rsi_window': 28, 'rsi_lower_threshold': 11, 'rsi_upper_threshold': 83, 'bollinger_window': 14, 'macd_slow_window': 23, 'macd_fast_window': 9, 'macd_sign_window': 7, 'atr_window': 20}
+2024-06-10 16:36:37,820 - Combination ('RSI', 'MACD', 'Bollinger Bands', 'ATR'): Best value: 1687078.1629651883
+2024-06-10 16:36:38,007 - Combination ('RSI', 'ATR'): Best parameters: {'n_shares': 18.899954755375447, 'stop_loss': 0.2410255302719636, 'take_profit': 0.38861318613545914, 'rsi_window': 38, 'rsi_lower_threshold': 18, 'rsi_upper_threshold': 70, 'atr_window': 11}
+2024-06-10 16:36:38,007 - Combination ('RSI', 'ATR'): Best value: 1594336.9561973864
+2024-06-10 16:37:16,829 - Combination ('RSI', 'MACD', 'Bollinger Bands'): Best parameters: {'n_shares': 19.165471391554334, 'stop_loss': 0.1103329973866822, 'take_profit': 0.3869450557002768, 'rsi_window': 14, 'rsi_lower_threshold': 30, 'rsi_upper_threshold': 77, 'bollinger_window': 25, 'macd_slow_window': 21, 'macd_fast_window': 20, 'macd_sign_window': 20}
+2024-06-10 16:37:16,829 - Combination ('RSI', 'MACD', 'Bollinger Bands'): Best value: 1710590.4807016873
+2024-06-10 16:37:49,512 - Combination ('RSI', 'Bollinger Bands'): Best parameters: {'n_shares': 19.86874778294141, 'stop_loss': 0.38936509471427444, 'take_profit': 0.29499555756759366, 'rsi_window': 20, 'rsi_lower_threshold': 10, 'rsi_upper_threshold': 83, 'bollinger_window': 6}
+2024-06-10 16:37:49,512 - Combination ('RSI', 'Bollinger Bands'): Best value: 942358.058857878
+2024-06-10 16:38:03,189 - Combination ('RSI',): Best parameters: {'n_shares': 15.1302542396572, 'stop_loss': 0.11779603142339384, 'take_profit': 0.29370498148853297, 'rsi_window': 26, 'rsi_lower_threshold': 27, 'rsi_upper_threshold': 89}
+2024-06-10 16:38:03,189 - Combination ('RSI',): Best value: 1489295.3510836754
+2024-06-10 16:48:10,674 - Combination ('Bollinger Bands',): Best parameters: {'n_shares': 3.2566413053245125, 'stop_loss': 0.13935217466092895, 'take_profit': 0.33680254056992276, 'bollinger_window': 5}
+2024-06-10 16:48:10,674 - Combination ('Bollinger Bands',): Best value: 987335.5380694725
+2024-06-10 16:48:11,314 - Final combination ('RSI',): Best parameters: {'n_shares': 15.1302542396572, 'stop_loss': 0.11779603142339384, 'take_profit': 0.29370498148853297, 'rsi_window': 26, 'rsi_lower_threshold': 27, 'rsi_upper_threshold': 89}
+2024-06-10 16:48:11,315 - Final combination ('RSI',): Best value: 1489295.3510836754
+2024-06-10 16:48:11,315 - Final combination ('MACD',): Best parameters: {'n_shares': 18.97693678243583, 'stop_loss': 0.11938019737943861, 'take_profit': 0.08135925432975458, 'macd_slow_window': 40, 'macd_fast_window': 17, 'macd_sign_window': 16}
+2024-06-10 16:48:11,315 - Final combination ('MACD',): Best value: 290609.64088527986
+2024-06-10 16:48:11,315 - Final combination ('Bollinger Bands',): Best parameters: {'n_shares': 3.2566413053245125, 'stop_loss': 0.13935217466092895, 'take_profit': 0.33680254056992276, 'bollinger_window': 5}
+2024-06-10 16:48:11,315 - Final combination ('Bollinger Bands',): Best value: 987335.5380694725
+2024-06-10 16:48:11,315 - Final combination ('ATR',): Best parameters: {'n_shares': 13.729049875882435, 'stop_loss': 0.212902208151422, 'take_profit': 0.39026361262353526, 'atr_window': 12}
+2024-06-10 16:48:11,315 - Final combination ('ATR',): Best value: 1740469.6907084202
+2024-06-10 16:48:11,315 - Final combination ('RSI', 'MACD'): Best parameters: {'n_shares': 19.7888587387473, 'stop_loss': 0.2114416416593569, 'take_profit': 0.3065553002501873, 'rsi_window': 6, 'rsi_lower_threshold': 30, 'rsi_upper_threshold': 75, 'macd_slow_window': 21, 'macd_fast_window': 5, 'macd_sign_window': 14}
+2024-06-10 16:48:11,315 - Final combination ('RSI', 'MACD'): Best value: 1669879.8963859207
+2024-06-10 16:48:11,315 - Final combination ('RSI', 'Bollinger Bands'): Best parameters: {'n_shares': 19.86874778294141, 'stop_loss': 0.38936509471427444, 'take_profit': 0.29499555756759366, 'rsi_window': 20, 'rsi_lower_threshold': 10, 'rsi_upper_threshold': 83, 'bollinger_window': 6}
+2024-06-10 16:48:11,315 - Final combination ('RSI', 'Bollinger Bands'): Best value: 942358.058857878
+2024-06-10 16:48:11,315 - Final combination ('RSI', 'ATR'): Best parameters: {'n_shares': 18.899954755375447, 'stop_loss': 0.2410255302719636, 'take_profit': 0.38861318613545914, 'rsi_window': 38, 'rsi_lower_threshold': 18, 'rsi_upper_threshold': 70, 'atr_window': 11}
+2024-06-10 16:48:11,315 - Final combination ('RSI', 'ATR'): Best value: 1594336.9561973864
+2024-06-10 16:48:11,315 - Final combination ('MACD', 'Bollinger Bands'): Best parameters: {'n_shares': 18.807061122994785, 'stop_loss': 0.39622254428899806, 'take_profit': 0.38161299269042226, 'bollinger_window': 50, 'macd_slow_window': 31, 'macd_fast_window': 17, 'macd_sign_window': 14}
+2024-06-10 16:48:11,316 - Final combination ('MACD', 'Bollinger Bands'): Best value: 1677596.984651485
+2024-06-10 16:48:11,316 - Final combination ('MACD', 'ATR'): Best parameters: {'n_shares': 19.827901022189145, 'stop_loss': 0.2646121966201176, 'take_profit': 0.39845707588148943, 'macd_slow_window': 23, 'macd_fast_window': 13, 'macd_sign_window': 7, 'atr_window': 11}
+2024-06-10 16:48:11,316 - Final combination ('MACD', 'ATR'): Best value: 1691329.8087602123
+2024-06-10 16:48:11,316 - Final combination ('Bollinger Bands', 'ATR'): Best parameters: {'n_shares': 19.7768109455081, 'stop_loss': 0.35744792098646405, 'take_profit': 0.3985380566024769, 'bollinger_window': 34, 'atr_window': 15}
+2024-06-10 16:48:11,316 - Final combination ('Bollinger Bands', 'ATR'): Best value: 1671595.844802741
+2024-06-10 16:48:11,316 - Final combination ('RSI', 'MACD', 'Bollinger Bands'): Best parameters: {'n_shares': 19.165471391554334, 'stop_loss': 0.1103329973866822, 'take_profit': 0.3869450557002768, 'rsi_window': 14, 'rsi_lower_threshold': 30, 'rsi_upper_threshold': 77, 'bollinger_window': 25, 'macd_slow_window': 21, 'macd_fast_window': 20, 'macd_sign_window': 20}
+2024-06-10 16:48:11,316 - Final combination ('RSI', 'MACD', 'Bollinger Bands'): Best value: 1710590.4807016873
+2024-06-10 16:48:11,316 - Final combination ('RSI', 'MACD', 'ATR'): Best parameters: {'n_shares': 16.932177812219006, 'stop_loss': 0.17015026817916656, 'take_profit': 0.3328260779360824, 'rsi_window': 34, 'rsi_lower_threshold': 10, 'rsi_upper_threshold': 83, 'macd_slow_window': 32, 'macd_fast_window': 12, 'macd_sign_window': 20, 'atr_window': 6}
+2024-06-10 16:48:11,316 - Final combination ('RSI', 'MACD', 'ATR'): Best value: 1443492.7123188414
+2024-06-10 16:48:11,316 - Final combination ('RSI', 'Bollinger Bands', 'ATR'): Best parameters: {'n_shares': 19.320425266759308, 'stop_loss': 0.2914978348843256, 'take_profit': 0.37146997868150305, 'rsi_window': 11, 'rsi_lower_threshold': 24, 'rsi_upper_threshold': 85, 'bollinger_window': 35, 'atr_window': 18}
+2024-06-10 16:48:11,316 - Final combination ('RSI', 'Bollinger Bands', 'ATR'): Best value: 1635788.9806127197
+2024-06-10 16:48:11,316 - Final combination ('MACD', 'Bollinger Bands', 'ATR'): Best parameters: {'n_shares': 19.94040444797851, 'stop_loss': 0.2952045317296642, 'take_profit': 0.25633316335481404, 'bollinger_window': 44, 'macd_slow_window': 38, 'macd_fast_window': 10, 'macd_sign_window': 14, 'atr_window': 20}
+2024-06-10 16:48:11,316 - Final combination ('MACD', 'Bollinger Bands', 'ATR'): Best value: 1684979.4040042255
+2024-06-10 16:48:11,316 - Final combination ('RSI', 'MACD', 'Bollinger Bands', 'ATR'): Best parameters: {'n_shares': 19.99469852985981, 'stop_loss': 0.34912764629836635, 'take_profit': 0.19180700382867552, 'rsi_window': 28, 'rsi_lower_threshold': 11, 'rsi_upper_threshold': 83, 'bollinger_window': 14, 'macd_slow_window': 23, 'macd_fast_window': 9, 'macd_sign_window': 7, 'atr_window': 20}
+2024-06-10 16:48:11,316 - Final combination ('RSI', 'MACD', 'Bollinger Bands', 'ATR'): Best value: 1687078.1629651883
+2024-06-10 16:48:11,316 -  
+2024-06-10 16:48:11,316 -  
+2024-06-10 16:48:11,317 - The best combination of indicators for BTC is: ('ATR',) with a value of: 1740469.6907084202
+2024-06-10 16:48:11,317 - Best outcome: {'combination': ('ATR',), 'value': 1740469.6907084202, 'params': {'n_shares': 13.729049875882435, 'stop_loss': 0.212902208151422, 'take_profit': 0.39026361262353526, 'atr_window': 12}}
