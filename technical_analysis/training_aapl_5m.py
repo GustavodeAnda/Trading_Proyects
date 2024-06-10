@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 
-data = pd.read_csv("./data/aapl_project_train.csv").dropna()
+data = pd.read_csv("C:/Users/sebmg/OneDrive/Documentos/GitHub/official_second_proyect/official_second_proyect/data/aapl_project_train.csv").dropna()
 
 n_shares = 93
 stop_loss = 0.3797931715217154
