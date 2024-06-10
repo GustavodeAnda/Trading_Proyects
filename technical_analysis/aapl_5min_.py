@@ -83,7 +83,7 @@ import json
 best_outcome_json = json.dumps(best_outcome_apple_5min, indent=4)
 
 # Saving file
-with open("best_outcome_apple_5min.txt", "w") as file:
+with open("../best_outcome_apple_5min.txt", "w") as file:
     file.write(best_outcome_json)
 
 
