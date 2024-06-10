@@ -6,7 +6,7 @@ from itertools import combinations
 import optuna
 
 # Load data
-data_aapl = pd.read_csv("./data/aapl_project_train.csv").dropna()
+data_aapl = pd.read_csv("C:/Users/sebmg/OneDrive/Documentos/GitHub/official_second_proyect/data/aapl_project_train.csv").dropna()
 
 # Calculate technical indicators
 aapl_technical_data = technical_analysis.calculate_technical_indicators(data_aapl)
