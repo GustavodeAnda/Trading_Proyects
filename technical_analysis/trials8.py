@@ -11,11 +11,10 @@ import logging
 # Configurar el registro
 logging.basicConfig(filename='optimization_log.txt', level=logging.INFO, format='%(asctime)s - %(message)s')
 
-
 def optimize_combination(args):
     combination, data = args
     study = optuna.create_study(direction='maximize')
-    study.optimize(func=lambda trial: profit_calculator.profit(trial, data, combination), n_trials=50)
+    study.optimize(func=lambda trial: profit_calculator.profit(trial, data, combination), n_trials=30)
     best_params = study.best_params
     best_value = study.best_value
 
@@ -24,11 +23,9 @@ def optimize_combination(args):
 
     return combination, best_params, best_value
 
-
 if __name__ == '__main__':
     # Load data
-    data_aapl = pd.read_csv(
-        "C:/Users/andre/Downloads/aapl_project_train.csv").dropna()
+    data_aapl = pd.read_csv("./data/aapl_project_1m_train.csv").dropna()
 
     # Calculate technical indicators
     aapl_technical_data = technical_analysis.calculate_technical_indicators(data_aapl)
@@ -70,17 +67,18 @@ if __name__ == '__main__':
         f"The best combination of indicators for APPLE is: {best_combination_aapl} with a value of: {best_value_aapl}")
 
     # Crear un diccionario con el mejor resultado
-    best_outcome_apple_5min = {
+    best_outcome_apple_1min = {
         "combination": best_combination_aapl,
         "value": best_value_aapl,
         "params": best_params_aapl
     }
 
-    logging.info(f"Best outcome: {best_outcome_apple_5min}")
+    logging.info(f"Best outcome: {best_outcome_apple_1min}")
 
     # Creating a JSON to avoid unnecessary testing
-    best_outcome_json = json.dumps(best_outcome_apple_5min, indent=4)
+    best_outcome_json = json.dumps(best_outcome_apple_1min, indent=4)
 
     # Saving file
-    with open("best_outcome_apple_5min.txt", "w") as file:
+    with open("best_outcome_apple_1min.txt", "w") as file:
         file.write(best_outcome_json)
+
