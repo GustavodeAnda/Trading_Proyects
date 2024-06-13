@@ -1,4 +1,4 @@
-# official_second_proyect
+# Trading Proyects
 
 ---
 
@@ -6,7 +6,7 @@
 The objective of this project is to create an algorithm that optimizes buy and sell signals as effectively as possible for trading using different models and strategies. We tested the code we created with two different assets: AAPL stock and BTC-USD cryptocurrency.
 
 ---
-
+## Proyect 2: Technical Analysis
 The main objective of this project is to optimize an algorithm that helps us perform efficient trading using different technical indicators such as RSI, MACD, Bollinger Bands, and ATR. What we implemented in the algorithm is the optimization of buy and sell signals by taking the different parameters used by each technical indicator, seeking the best combination of these different technical indicators to achieve positive results. The results obtained can be found in the Jupyter notebook.
 
 To get started with this repository, you will need to have Python installed on your machine. We recommend using Python 3.10 or higher.
@@ -50,3 +50,5 @@ Lastly, we have the profit_calculator function, which is responsible for loading
 Additionally, in the technical_analysis folder, we have four training files for BTC and AAPL, which can be run thanks to the optimal portfolio results saved in a separate TXT file. These were created to compare them with the benchmark. On the other hand, we have the test files, from which we extracted information from the training files in the data directory using the optimal indicators for the respective asset. 
 
 A test file named trials8.py was created to maximize the use of processors and run the code faster.
+
+## Proyect 3: Machine learning applied to trading
