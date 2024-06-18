@@ -5,6 +5,13 @@ from sklearn.linear_model import LogisticRegression, LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix, mean_squared_error
 import ta
+import optuna
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
+from xgboost import XGBClassifier
+from sklearn.metrics import f1_score
+from sklearn.metrics import accuracy_score
+
 
 data = pd.read_csv("./data/aapl_project_train.csv").dropna()
 
@@ -56,38 +63,40 @@ X_train, X_test, y_train, y_test = train_test_split(data_clas.drop("Y", axis=1),
                                                     data_clas.Y,
                                                     shuffle=False, test_size=0.2)
 
-classification_model = LogisticRegression().fit(X_train, y_train)
 
-classification_model.predict(X_train)
+# Definir la función objetivo
+def objective(trial):
+    #     # Definir el rango de valores para los hiperparámetros
+    C = trial.suggest_float('C', 1e-2, 1000, log=True)
+    kernel = trial.suggest_categorical('kernel', ['linear', 'poly', 'rbf'])
+    gamma = trial.suggest_float('gamma', 1e-2, 1e1, log=True)
 
-classification_model.score(X_train, y_train)
+    # Crear el modelo SVC
+    model = SVC(C=C, kernel=kernel, gamma=gamma, max_iter=10_000)
 
-from sklearn.metrics import f1_score
-f1_score(y_train, classification_model.predict(X_train))
+    # Entrenar el modelo
+    model.fit(X_train, y_train)
 
-### Classification V2
+    # Evaluar el modelo
+    y_pred = model.predict(X_test)
+    # Calculate confusion matrix
+    tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
 
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.svm import SVC
-from xgboost import XGBClassifier
+    # Calculate FPR
+    fpr = fp / (fp + tn)
 
-ran_forest = RandomForestClassifier().fit(X_train,y_train)
-svc = SVC(C=500, max_iter=1000).fit(X_train,y_train)
-# xgb = XGBClassifier().fit(X_train,y_train)
+    return fpr
 
-## F1 score
 
-### Regresión Lógistica
-# f1_score(y_train, classification_model.predict(X_train))
-# f1_score(y_train, ran_forest.predict(X_train))
-f1_score(y_train, svc.predict(X_train))
-# f1_score(y_train, xgb.predict(X_train))
+# Crear un objeto de estudio
+study = optuna.create_study(direction="minimize")
 
-import functions_ml as ml
+# Ejecutar el proceso de optimización
+study.optimize(objective, n_trials=30)
 
-metrics_svc = ml.calculate_confusion_matrix_metrics(ran_forest, X_train, y_train)
-# metrics_xgb = ml.calculate_confusion_matrix_metrics(xgb, X_train, y_train)
-
-fpr_svc = ml.fpr(metrics_svc["false_positives"], metrics_svc["true_negatives"])
-# fpr_xgb = ml.fpr(metrics_xgb["false_positives"], metrics_xgb["true_negatives"])
-print(fpr_svc)
+# Mostrar los mejores parámetros
+# saved_study = optuna.load_study(study_name=study, storage=storage_url)
+# storage_url = "sqlite:///example.db"
+print("Best trial:", study.best_trial.number)
+print("Best value:", study.best_trial.value)
+print("Best hyperparameters:", study.best_params)
