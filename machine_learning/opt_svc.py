@@ -71,5 +71,23 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 from xgboost import XGBClassifier
 
-svc = SVC(C=500, max_iter=100_000).fit(X_train,y_train)
-print(svc)
+ran_forest = RandomForestClassifier().fit(X_train,y_train)
+svc = SVC(C=500, max_iter=1000).fit(X_train,y_train)
+# xgb = XGBClassifier().fit(X_train,y_train)
+
+## F1 score
+
+### Regresión Lógistica
+# f1_score(y_train, classification_model.predict(X_train))
+# f1_score(y_train, ran_forest.predict(X_train))
+f1_score(y_train, svc.predict(X_train))
+# f1_score(y_train, xgb.predict(X_train))
+
+import functions_ml as ml
+
+metrics_svc = ml.calculate_confusion_matrix_metrics(ran_forest, X_train, y_train)
+# metrics_xgb = ml.calculate_confusion_matrix_metrics(xgb, X_train, y_train)
+
+fpr_svc = ml.fpr(metrics_svc["false_positives"], metrics_svc["true_negatives"])
+# fpr_xgb = ml.fpr(metrics_xgb["false_positives"], metrics_xgb["true_negatives"])
+print(fpr_svc)

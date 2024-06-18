@@ -87,7 +87,5 @@ import functions_ml as ml
 
 metrics_svc = ml.calculate_confusion_matrix_metrics(ran_forest, X_train, y_train)
 metrics_xgb = ml.calculate_confusion_matrix_metrics(xgb, X_train, y_train)
-
 fpr_svc = ml.fpr(metrics_svc["false_positives"], metrics_svc["true_negatives"])
 fpr_xgb = ml.fpr(metrics_xgb["false_positives"], metrics_xgb["true_negatives"])
-print(fpr_xgb)

@@ -52,3 +52,24 @@ Additionally, in the technical_analysis folder, we have four training files for 
 A test file named trials8.py was created to maximize the use of processors and run the code faster.
 
 ## Proyect 3: Machine learning applied to trading
+
+
+## Creating an SSH KEY
+
+### Step 1
+ssh-keygen -t rsa -b 4096 -C "tu_email@example.com"
+
+
+### Step 2
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/id_rsa
+
+
+### Step 3
+cat ~/.ssh/id_rsa.pub
+
+### Step 4
+
+Copy the text below the command and paste on the ssh creator on github
+
+
