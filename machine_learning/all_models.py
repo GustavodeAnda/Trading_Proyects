@@ -9,7 +9,6 @@ from sklearn.svm import SVC
 from xgboost import XGBClassifier
 import ta
 
-# Cargar y limpiar los datos
 data = pd.read_csv("./data/aapl_project_train.csv").dropna()
 
 data_clean = data.loc[:, ["Close"]]
@@ -43,7 +42,6 @@ data_clean["bollinger_50_2_5_lband"] = bollinger_50_2_5.bollinger_lband()
 data_clean["bollinger_50_2_5_mavg"] = bollinger_50_2_5.bollinger_mavg()
 data_clean = data_clean.dropna()
 
-# Clasificación
 data_clas = data_clean.drop("Y", axis=1).copy()
 data_clas["Y"] = data_clas.Close < data_clas.Close.shift(-1)
 
@@ -51,7 +49,6 @@ X_train, X_test, y_train, y_test = train_test_split(data_clas.drop("Y", axis=1),
                                                     data_clas.Y,
                                                     shuffle=False, test_size=0.2)
 
-# Modelos individuales
 classification_model = LogisticRegression().fit(X_train, y_train)
 svc = SVC(C=500, max_iter=100_000, probability=True).fit(X_train, y_train)
 xgb = XGBClassifier().fit(X_train, y_train)
@@ -64,7 +61,6 @@ ensemble_model = VotingClassifier(estimators=[
 
 ensemble_model.fit(X_train, y_train)
 
-# Calcular FPR global para el ensemble
 y_pred_ensemble = ensemble_model.predict(X_train)
 cm_ensemble = confusion_matrix(y_train, y_pred_ensemble)
 
