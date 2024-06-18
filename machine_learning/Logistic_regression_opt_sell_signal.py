@@ -277,6 +277,7 @@ plt.plot(portfolio_value, label="Active")
 plt.plot(portfolio_value_benchmark_list, label="Passive")
 plt.legend()
 plt.show()
+print(df_buysignals)
 
 
 
