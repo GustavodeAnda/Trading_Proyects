@@ -137,14 +137,14 @@ def objective(trial):
 
 
  # Crear un objeto de estudio
-study = optuna.create_study(direction="minimize")
+#study = optuna.create_study(direction="minimize")
 #
 # # Ejecutar el proceso de optimización
-study.optimize(objective, n_trials=50)
+#study.optimize(objective, n_trials=50)
 #
-print("Best trial:", study.best_trial.number)
-print("Best value:", study.best_trial.value)
-print("Best hyperparameters:", study.best_params)
+#print("Best trial:", study.best_trial.number)
+#print("Best value:", study.best_trial.value)
+#print("Best hyperparameters:", study.best_params)
 
 files = reading_files(list_of_equity)
 data = files["./data/btc_project_test.csv"]
@@ -201,9 +201,9 @@ def model_y(best_params):
     trading_df['SELL_SIGNAL'] = signals
     return trading_df
 
-x = model_y(study.best_params)
-# x = model_y(
-    #{'C': 145, 'fit_intercept': False, 'l1_ratio': 0.9475016449857})
+# x = model_y(study.best_params)
+x = model_y(
+    {'C': 7.21776864149052e-07, 'fit_intercept': False, 'l1_ratio': 0.568323517441825})
 df_sellsignals = x[['Close', 'SELL_SIGNAL']]
 
 print("###############################################")
@@ -211,9 +211,9 @@ print("Trading signals:", sum(df_sellsignals['SELL_SIGNAL']))
 
 
 capital = 1_000_000
-n_shares = 25
-stop_loss = 0.95
-take_profit = 0.95
+n_shares = 2
+stop_loss = 0.015
+take_profit = 0.020
 COM = 0.125 / 100
 
 active_positions = []
