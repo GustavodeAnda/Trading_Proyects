@@ -200,7 +200,7 @@ def model_y(best_params):
     trading_df = X_test_t.copy()
     trading_df['SELL_SIGNAL'] = signals
     return trading_df
-
+#
 # x = model_y(study.best_params)
 x = model_y(
     {'C': 7.21776864149052e-07, 'fit_intercept': False, 'l1_ratio': 0.568323517441825})
