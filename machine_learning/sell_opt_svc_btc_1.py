@@ -111,16 +111,16 @@ def objective(trial):
 
 
 # Crear un objeto de estudio
-study = optuna.create_study(direction="minimize")
+# study = optuna.create_study(direction="minimize")
 
 # Ejecutar el proceso de optimización
 
-study.optimize(objective, n_trials=30)
+# study.optimize(objective, n_trials=30)
 # Mostrar los mejores parámetros
 
-print("Best trial:", study.best_trial.number)
-print("Best value:", study.best_trial.value)
-print("Best hyperparameters:", study.best_params)
+#print("Best trial:", study.best_trial.number)
+#print("Best value:", study.best_trial.value)
+#print("Best hyperparameters:", study.best_params)
 
 files = reading_files(list_of_equity)
 data = files["./data/btc_project_1m_test.csv"]
@@ -182,9 +182,9 @@ def model_y(best_params):
     trading_df['SELL_SIGNAL'] = signals
     return trading_df
 
-x = model_y(study.best_params)
-#x = model_y(
-#    {'C': 4.078308765656782, 'kernel': 'linear', 'gamma': 1.02657882968666})
+#x = model_y(study.best_params)
+x = model_y(
+    {'C': 0.8079144371903441, 'kernel': 'poly', 'gamma': 2.419502351485599})
 df_sellsignals = x[['Close', 'SELL_SIGNAL']]
 
 print("###############################################")
