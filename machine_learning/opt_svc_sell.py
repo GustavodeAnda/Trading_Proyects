@@ -72,10 +72,6 @@ data_clean["bollinger_50_2_5_lband"] = bollinger_50_2_5.bollinger_lband()
 data_clean["bollinger_50_2_5_mavg"] = bollinger_50_2_5.bollinger_mavg()
 data_clean = data_clean.dropna()
 
-data_clean["atr_14"] = (ta.volatility.AverageTrueRange(high=data["High"], low=data["Low"], close=data["Close"], window=14)).average_true_range()
-data_clean["atr_10"] = (ta.volatility.AverageTrueRange(high=data["High"], low=data["Low"], close=data["Close"], window=10)).average_true_range()
-data_clean["atr_20"] = (ta.volatility.AverageTrueRange(high=data["High"], low=data["Low"], close=data["Close"], window=20)).average_true_range()
-
 
 ## Classification
 
@@ -178,7 +174,7 @@ X_train_t, X_test_t, y_train_t, y_test_t = train_test_split(data_clas.drop("Y", 
 
 
 def model_y(best_params):
-    model = SVC(**best_params)
+    model = SVC(**best_params, max_iter=10_000)
     model.fit(X_train, y_train)
     signals = model.predict(X_test_t)
     trading_df = X_test_t.copy()
@@ -194,9 +190,9 @@ print("###############################################")
 print("Trading signals:", sum(df_sellsignals['SELL_SIGNAL']))
 
 capital = 1_000_000
-n_shares = 100
-stop_loss = 0.4
-take_profit = 0.4
+n_shares = 25
+stop_loss = 0.8
+take_profit = 0.8
 COM = 0.125 / 100
 
 active_positions = []
@@ -216,7 +212,7 @@ for i, row in df_sellsignals.iterrows():
     # Verificar si hay señal de venta
     if row.SELL_SIGNAL:
         # Verificar si tenemos suficientes acciones para vender
-        if (capital > row.Close * (1 + COM) * n_shares * 1.2) and len(active_positions) < 1000:
+        if (capital > row.Close * (1 + COM) * n_shares * 1.1) and len(active_positions) < 1000:
             capital -= row.Close * (COM) * n_shares
             active_positions.append({
                 "type": "SHORT",
