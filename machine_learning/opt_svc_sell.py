@@ -79,7 +79,7 @@ data_clas = data_clean.drop("Y", axis=1).copy()
 data_clas.head()
 
 ### esto que esta haciendo?
-data_clas["Y"] = data_clas.Close > data_clas.Close.shift(-1)
+data_clas["Y"] = data_clas.Close > data_clas.Close.shift(-15)
 
 X_train, X_test, y_train, y_test = train_test_split(data_clas.drop("Y", axis=1),
                                                     data_clas.Y,
