@@ -115,7 +115,7 @@ def objective(trial):
 
 # Ejecutar el proceso de optimización
 
-# study.optimize(objective, n_trials=30)
+# study.optimize(objective, n_trials=50)
 # Mostrar los mejores parámetros
 
 #print("Best trial:", study.best_trial.number)
