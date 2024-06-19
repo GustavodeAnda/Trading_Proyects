@@ -154,7 +154,7 @@ X_train_t, X_test_t, y_train_t, y_test_t = train_test_split(data_clas.drop("Y", 
 
 
 def model_y(best_params):
-    model = XGBClassifier(**best_params)
+    model = SVC(**best_params)
     model.fit(X_train, y_train)
     signals = model.predict(X_test_t)
     trading_df = X_test_t.copy()
@@ -223,7 +223,7 @@ plt.figure(figsize=(12, 6))
 plt.plot(portfolio_value)
 plt.xlabel('Período de Tiempo')
 plt.ylabel('Valor del Portafolio')
-plt.title('Evolución del Valor del Portafolio Basado en Señales de Compra')
+plt.title('Evolución del Valor del Portafolio Basado en Señales de Venta')
 plt.legend()
 plt.grid(True)
 
