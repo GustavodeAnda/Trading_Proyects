@@ -79,7 +79,7 @@ X_train, X_test, y_train, y_test = train_test_split(data_clas.drop("Y", axis=1),
 # Testing the model
 
 files = reading_files(list_of_equity)
-data = files["./data/aapl_project_1m_test.csv"]
+data = files["./data/aapl_project_test.csv"]
 
 data_clean = data.loc[:, ["Close"]]
 data_clean["Y"] = data_clean.shift(-15)
