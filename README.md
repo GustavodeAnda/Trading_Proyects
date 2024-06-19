@@ -53,23 +53,13 @@ A test file named trials8.py was created to maximize the use of processors and r
 
 ## Proyect 3: Machine learning applied to trading
 
+Well, first of all, we created a new folder called "machine_learning" to store all the respective files for this third project. Inside the folder, you will find the four models we implemented: Logistic Regression, SVC, and XGBoost. Now, if you want to run any of those codes, it must be done from the terminal. Some of the codes are commented with the already optimized hyperparameters for comparison with the benchmark, like this:
 
-## Creating an SSH KEY
+```python
+x = model_y(study.best_params)
+# x = model_y(
+#    {'C': 6.66, 'kernel': 'linear', 'gamma': 9.50})
+df_buysignals = x[['Close', 'BUY_SIGNAL']]
 
-### Step 1
-ssh-keygen -t rsa -b 4096 -C "tu_email@example.com"
-
-
-### Step 2
-eval "$(ssh-agent -s)"
-ssh-add ~/.ssh/id_rsa
-
-
-### Step 3
-cat ~/.ssh/id_rsa.pub
-
-### Step 4
-
-Copy the text below the command and paste on the ssh creator on github
-
-
+```
+Additionally, each machine learning model has its own frequency and dataset, in these cases, AAPL and BTC with 1-minute and 5-minute intervals. In the "data" folder, the new images with the results of the ML models applied to trading have been uploaded. Similarly, in Jupyter, the results and indicators are explained.
