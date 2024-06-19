@@ -211,7 +211,7 @@ print("Trading signals:", sum(df_sellsignals['SELL_SIGNAL']))
 
 
 capital = 1_000_000
-n_shares = 55
+n_shares = 25
 stop_loss = 0.95
 take_profit = 0.95
 COM = 0.125 / 100

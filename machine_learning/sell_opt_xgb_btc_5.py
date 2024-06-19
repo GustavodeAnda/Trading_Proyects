@@ -151,12 +151,12 @@ def objective(trial):
     return fpr
 
 
-# study = optuna.create_study(direction="minimize")
-# study.optimize(objective, n_trials=50)
+study = optuna.create_study(direction="minimize")
+study.optimize(objective, n_trials=50)
 #
-# print("Best trial:", study.best_trial.number)
-# print("Best value:", study.best_trial.value)
-# print("Best hyperparameters:", study.best_params)
+print("Best trial:", study.best_trial.number)
+print("Best value:", study.best_trial.value)
+print("Best hyperparameters:", study.best_params)
 
 
 
@@ -221,17 +221,17 @@ def model_y(best_params):
     return trading_df
 
 
-# x = model_y(study.best_params)
-x = model_y(
-    {'n_estimators': 145, 'max_depth': 3, 'max_leaves': 2, 'learning_rate': 0.01012950768037197, 'booster': 'gblinear',
-     'gamma': 2.082354189043541e-06, 'reg_lambda': 2.1214343332908175e-07})
+x = model_y(study.best_params)
+#x = model_y(
+#    {'n_estimators': 145, 'max_depth': 3, 'max_leaves': 2, 'learning_rate': 0.01012950768037197, 'booster': 'gblinear',
+#     'gamma': 2.082354189043541e-06, 'reg_lambda': 2.1214343332908175e-07})
 df_sellsignals = x[['Close', 'SELL_SIGNAL']]
 
 print("###############################################")
 print("Trading signals:", sum(df_sellsignals['SELL_SIGNAL']))
 
 capital = 1_000_000
-n_shares = 50
+n_shares = 25
 stop_loss = 0.4
 take_profit = 0.4
 COM = 0.125 / 100
