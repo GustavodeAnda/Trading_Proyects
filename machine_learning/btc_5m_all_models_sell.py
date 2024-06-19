@@ -75,9 +75,6 @@ X_train, X_test, y_train, y_test = train_test_split(data_clas.drop("Y", axis=1),
                                                     shuffle=False, test_size=0.2)
 
 
-
-# Testing the model
-
 files = reading_files(list_of_equity)
 data = files["./data/btc_project_test.csv"]
 
@@ -150,7 +147,7 @@ print("###############################################")
 print("Trading signals:", sum(df_sellsignals['SELL_SIGNAL']))
 
 capital = 1_000_000
-n_shares = 25
+n_shares = 5
 stop_loss = 0.4
 take_profit = 0.4
 COM = 0.125 / 100
