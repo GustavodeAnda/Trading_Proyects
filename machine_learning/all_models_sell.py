@@ -68,7 +68,7 @@ data_clean["bollinger_50_2_5_mavg"] = bollinger_50_2_5.bollinger_mavg()
 data_clean = data_clean.dropna()
 
 data_clas = data_clean.drop("Y", axis=1).copy()
-data_clas["Y"] = data_clas.Close < data_clas.Close.shift(-15)
+data_clas["Y"] = data_clas.Close > data_clas.Close.shift(-15)
 
 X_train, X_test, y_train, y_test = train_test_split(data_clas.drop("Y", axis=1),
                                                     data_clas.Y,
@@ -117,7 +117,7 @@ data_clean = data_clean.dropna()
 
 data_clas = data_clean.drop("Y", axis=1).copy()
 
-data_clas["Y"] = data_clas.Close < data_clas.Close.shift(-15)
+data_clas["Y"] = data_clas.Close > data_clas.Close.shift(-15)
 
 X_train_t, X_test_t, y_train_t, y_test_t = train_test_split(data_clas.drop("Y", axis=1),
                                                             data_clas.Y,
@@ -138,89 +138,85 @@ def model_y():
 
     signals = ensemble_model.predict(X_test_t)
     trading_df = X_test_t.copy()
-    trading_df['BUY_SIGNAL'] = signals
+    trading_df['SELL_SIGNAL'] = signals
 
     return trading_df
 
 
 x = model_y()
-df_buysignals = x[['Close', 'BUY_SIGNAL']]
+df_sellsignals = x[['Close', 'SELL_SIGNAL']]
 
 print("###############################################")
-print("Trading signals:", sum(df_buysignals['BUY_SIGNAL']))
+print("Trading signals:", sum(df_sellsignals['SELL_SIGNAL']))
 
 capital = 1_000_000
-n_shares = 115
-stop_loss = 0.05
-take_profit = 0.05
-
+n_shares = 25
+stop_loss = 0.4
+take_profit = 0.4
 COM = 0.125 / 100
 
 active_positions = []
 portfolio_value = [capital]
 
-for i, row in df_buysignals.iterrows():
-    # Close all positions that are above/under tp or sl
+for i, row in df_sellsignals.iterrows():
+    # Cerrar todas las posiciones que han alcanzado el stop loss o el take profit
     active_pos_copy = active_positions.copy()
     for pos in active_pos_copy:
-        if row.Close < pos["stop_loss"]:
-            # LOSS
-            capital += row.Close * pos["n_shares"] * (1 - COM)
+        if row.Close > pos["stop_loss"]:  # La posición se cierra con pérdida
+            capital += (pos["sold_at"] - row.Close) * pos["n_shares"] * (1 - COM)
             active_positions.remove(pos)
-            print("Closing position,", capital, len(active_positions))
-        elif row.Close > pos["take_profit"]:
-            # PROFIT
-            capital += row.Close * pos["n_shares"] * (1 - COM)
+        elif row.Close < pos["take_profit"]:  # La posición se cierra con ganancia
+            capital += (pos["sold_at"] - row.Close) * pos["n_shares"] * (1 - COM)
             active_positions.remove(pos)
-            print("Closing position,", capital, len(active_positions))
 
-    # Check if trading signal is True
-    if row['BUY_SIGNAL']:
-        # Check if we have enough cash
-        if capital > row.Close * (1 + COM) * n_shares:
-            capital -= row.Close * (1 + COM) * n_shares
+    # Verificar si hay señal de venta
+    if row.SELL_SIGNAL:
+        # Verificar si tenemos suficientes acciones para vender
+        if (capital > row.Close * (1 + COM) * n_shares * 1.1) and len(active_positions) < 1000:
+            capital -= row.Close * (COM) * n_shares
             active_positions.append({
-                "type": "LONG",
-                "bought_at": row.Close,
+                "type": "SHORT",
+                "sold_at": row.Close,
                 "n_shares": n_shares,
-                "stop_loss": row.Close * (1 - stop_loss),
-                "take_profit": row.Close * (1 + take_profit)
+                "stop_loss": row.Close * (1 + stop_loss),
+                "take_profit": row.Close * (1 - take_profit)
             })
         else:
             print("OUT OF CASH")
 
-    # Portfolio value through time
-    positions_value = sum([p["n_shares"] * row.Close for p in active_positions])
+    # Valor del portafolio a través del tiempo
+    positions_value = sum([(pos["sold_at"] - row.Close) * pos["n_shares"] for pos in active_positions])
     portfolio_value.append(capital + positions_value)
 
-# Close all positions that are above/under tp or sl
-for pos in active_positions:
-    capital += df_buysignals.iloc[-1].Close * pos["n_shares"] * (1 - COM)
+# Cerrar todas las posiciones restantes al final
+for pos in active_positions.copy():
+    capital += (pos["sold_at"] - row.Close) * pos["n_shares"] * (1 - COM)
+    active_positions.remove(pos)
 
 portfolio_value.append(capital)
+
 
 # Graficar el valor del portafolio
 plt.figure(figsize=(12, 6))
 plt.plot(portfolio_value)
 plt.xlabel('Período de Tiempo')
 plt.ylabel('Valor del Portafolio')
-plt.title('Evolución del Valor del Portafolio Basado en Señales de Compra')
+plt.title('Evolución del Valor del Portafolio Basado en Señales de Venta')
 plt.legend()
 plt.grid(True)
 
 capital_benchmark = 1_000_000
-shares_to_buy = capital_benchmark // (df_buysignals.Close.values[0] * (1 + COM))
-capital_benchmark -= shares_to_buy * df_buysignals.Close.values[0] * (1 + COM)
-portfolio_value_benchmark = (shares_to_buy * df_buysignals.Close) + capital_benchmark
+shares_to_buy = capital_benchmark // (df_sellsignals.Close.values[0] * (1 + COM))
+capital_benchmark -= shares_to_buy * df_sellsignals.Close.values[0] * (1 + COM)
+portfolio_value_benchmark = (shares_to_buy * df_sellsignals.Close) + capital_benchmark
 portfolio_value_benchmark_list = portfolio_value_benchmark.tolist()
 
 plt.title(f"Active={(portfolio_value[-1] / 1_000_000 - 1) * 100}%\n" +
           f"Passive={(portfolio_value_benchmark.values[-1] / 1_000_000 - 1) * 100}%")
 plt.plot(portfolio_value, label="Active")
 plt.plot(portfolio_value_benchmark_list, label="Passive")
-plt.show()
-
 plt.legend()
+plt.show()
 
 
 
