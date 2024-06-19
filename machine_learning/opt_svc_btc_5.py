@@ -37,7 +37,7 @@ def reading_files(list_of_files: str):
 
 
 files = reading_files(list_of_equity)
-data = files["./data/aapl_project_train.csv"]
+data = files["./data/btc_project_train.csv"]
 data.head()
 
 data_clean = data.loc[:, ["Close"]]
@@ -152,7 +152,7 @@ print("Best value:", study.best_trial.value)
 print("Best hyperparameters:", study.best_params)
 
 files = reading_files(list_of_equity)
-data = files["./data/aapl_project_test.csv"]
+data = files["./data/btc_project_test.csv"]
 
 data_clean = data.loc[:, ["Close"]]
 data_clean["Y"] = data_clean.shift(-15)

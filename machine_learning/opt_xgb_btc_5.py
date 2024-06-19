@@ -37,7 +37,7 @@ def reading_files(list_of_files: str):
 
 
 files = reading_files(list_of_equity)
-data = files["./data/aapl_project_train.csv"]
+data = files["./data/btc_project_train.csv"]
 data.head()
 
 data_clean = data.loc[:, ["Close"]]
@@ -114,22 +114,33 @@ X_train, X_test, y_train, y_test = train_test_split(data_clas.drop("Y", axis=1),
                                                     data_clas.Y,
                                                     shuffle=False, test_size=0.2)
 
-svc = SVC().fit(X_train, y_train)
-svc_pred = svc.predict(X_train)
-svc_score = svc.score(X_train, y_train)
+xgb = XGBClassifier().fit(X_train, y_train)
+xgb_pred = xgb.predict(X_train)
+xgb_score = xgb.score(X_train, y_train)
 
-f1_score_svc = f1_score(y_train, svc.predict(X_train))
-metrics_svc = calculate_confusion_matrix_metrics(svc, X_train, y_train)
+f1_score_xgb = f1_score(y_train, xgb.predict(X_train))
+metrics_xgb = calculate_confusion_matrix_metrics(xgb, X_train, y_train)
 
 
 # Definir la función objetivo
 def objective(trial):
-    C = trial.suggest_float('C', 1e-2, 1000, log=True)
-    kernel = trial.suggest_categorical('kernel', ['linear', 'poly', 'rbf'])
-    gamma = trial.suggest_float('gamma', 1e-2, 1e1, log=True)
+    n_estimators = trial.suggest_int('n_estimators', 50, 200)
+    max_depth = trial.suggest_int('max_depth', 3, 10)
+    max_leaves = trial.suggest_int('max_leaves', 0, 10)
+    learning_rate = trial.suggest_loguniform('learning_rate', 1e-4, 1e-1)
+    booster = trial.suggest_categorical('booster', ['gbtree', 'gblinear', 'dart'])
+    gamma = trial.suggest_loguniform('gamma', 1e-8, 1.0)
+    reg_lambda = trial.suggest_loguniform('reg_lambda', 1e-8, 1.0)
 
     # Crear el modelo SVC
-    model = SVC(C=C, kernel=kernel, gamma=gamma, max_iter=10_000)
+    model = XGBClassifier(
+        n_estimators=n_estimators,
+        max_depth=max_depth,
+        max_leaves=max_leaves,
+        learning_rate=learning_rate,
+        booster=booster,
+        gamma=gamma,
+        reg_lambda=reg_lambda)
 
     # Entrenar el modelo
     model.fit(X_train, y_train)
@@ -152,7 +163,7 @@ print("Best value:", study.best_trial.value)
 print("Best hyperparameters:", study.best_params)
 
 files = reading_files(list_of_equity)
-data = files["./data/aapl_project_test.csv"]
+data = files["./data/btc_project_test.csv"]
 
 data_clean = data.loc[:, ["Close"]]
 data_clean["Y"] = data_clean.shift(-15)
@@ -204,7 +215,7 @@ X_train_t, X_test_t, y_train_t, y_test_t = train_test_split(data_clas.drop("Y", 
 
 
 def model_y(best_params):
-    model = SVC(**best_params)
+    model = XGBClassifier(**best_params)
     model.fit(X_train, y_train)
     signals = model.predict(X_test_t)
     trading_df = X_test_t.copy()
@@ -214,7 +225,8 @@ def model_y(best_params):
 
 x = model_y(study.best_params)
 #x = model_y(
-#    {'C': 6.66, 'kernel': 'linear', 'gamma': 9.50})
+#    {'n_estimators': 145, 'max_depth': 4, 'max_leaves': 9, 'learning_rate': 0.09734559639741085, 'booster': 'dart',
+#     'gamma': 2.787331037777771e-07, 'reg_lambda': 6.9741950464194356e-06})
 df_buysignals = x[['Close', 'BUY_SIGNAL']]
 
 print("###############################################")
