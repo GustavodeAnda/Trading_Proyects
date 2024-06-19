@@ -162,6 +162,8 @@ print("Best trial:", study.best_trial.number)
 print("Best value:", study.best_trial.value)
 print("Best hyperparameters:", study.best_params)
 
+error = 
+
 files = reading_files(list_of_equity)
 data = files["./data/aapl_project_test.csv"]
 
