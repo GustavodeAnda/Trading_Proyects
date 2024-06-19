@@ -37,7 +37,7 @@ def reading_files(list_of_files: str):
 
 
 files = reading_files(list_of_equity)
-data = files["./data/aapl_project_train.csv"]
+data = files["./data/aapl_project_1m_train.csv"]
 data.head()
 
 data_clean = data.loc[:, ["Close"]]
@@ -155,15 +155,15 @@ def objective(trial):
     return fpr
 
 
-# study = optuna.create_study(direction="minimize")
-# study.optimize(objective, n_trials=50)
+study = optuna.create_study(direction="minimize")
+study.optimize(objective, n_trials=10)
 
-#print("Best trial:", study.best_trial.number)
-#print("Best value:", study.best_trial.value)
-#print("Best hyperparameters:", study.best_params)
+print("Best trial:", study.best_trial.number)
+print("Best value:", study.best_trial.value)
+print("Best hyperparameters:", study.best_params)
 
 files = reading_files(list_of_equity)
-data = files["./data/aapl_project_test.csv"]
+data = files["./data/aapl_project_1m_test.csv"]
 
 data_clean = data.loc[:, ["Close"]]
 data_clean["Y"] = data_clean.shift(-15)
@@ -223,18 +223,17 @@ def model_y(best_params):
     return trading_df
 
 
-# x = model_y(study.best_params)
-x = model_y(
-    {'n_estimators': 145, 'max_depth': 4, 'max_leaves': 9, 'learning_rate': 0.09734559639741085, 'booster': 'dart',
-     'gamma': 2.787331037777771e-07, 'reg_lambda': 6.9741950464194356e-06})
+x = model_y(study.best_params)
+#    {'n_estimators': 145, 'max_depth': 4, 'max_leaves': 9, 'learning_rate': 0.09734559639741085, 'booster': 'dart',
+#     'gamma': 2.787331037777771e-07, 'reg_lambda': 6.9741950464194356e-06})
 df_buysignals = x[['Close', 'BUY_SIGNAL']]
 
 print("###############################################")
 print("Trading signals:", sum(df_buysignals['BUY_SIGNAL']))
 capital = 1_000_000
-n_shares = 100
-stop_loss = 0.05
-take_profit = 0.05
+n_shares = 44
+stop_loss = 0.17
+take_profit = 0.35
 
 COM = 0.125 / 100
 

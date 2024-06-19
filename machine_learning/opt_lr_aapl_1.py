@@ -38,7 +38,7 @@ def reading_files(list_of_files: str):
 
 
 files = reading_files(list_of_equity)
-data = files["./data/aapl_project_train.csv"]
+data = files["./data/aapl_project_1m_train.csv"]
 data.head()
 
 data_clean = data.loc[:, ["Close"]]
@@ -154,7 +154,7 @@ print("Best value:", study.best_trial.value)
 print("Best hyperparameters:", study.best_params)
 
 files = reading_files(list_of_equity)
-data = files["./data/aapl_project_test.csv"]
+data = files["./data/aapl_project_1m_test.csv"]
 
 data_clean = data.loc[:, ["Close"]]
 data_clean["Y"] = data_clean.shift(-15)
@@ -221,7 +221,7 @@ df_buysignals = x[['Close', 'BUY_SIGNAL']]
 print("###############################################")
 print("Trading signals:", sum(df_buysignals['BUY_SIGNAL']))
 capital = 1_000_000
-n_shares = 100
+n_shares = 4
 stop_loss = 0.05
 take_profit = 0.05
 
