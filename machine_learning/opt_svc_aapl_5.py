@@ -108,7 +108,7 @@ def fpr(false_positives, true_negatives):
     return false_positives / (false_positives + true_negatives)
 
 
-data_clas["Y"] = data_clas.Close < data_clas.Close.shift(-1)
+data_clas["Y"] = data_clas.Close < data_clas.Close.shift(-15)
 
 X_train, X_test, y_train, y_test = train_test_split(data_clas.drop("Y", axis=1),
                                                     data_clas.Y,
@@ -204,7 +204,7 @@ X_train_t, X_test_t, y_train_t, y_test_t = train_test_split(data_clas.drop("Y", 
 
 
 def model_y(best_params):
-    model = SVC(**best_params)
+    model = SVC(**best_params, max_iter=10_000)
     model.fit(X_train, y_train)
     signals = model.predict(X_test_t)
     trading_df = X_test_t.copy()
