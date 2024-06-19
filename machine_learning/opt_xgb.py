@@ -300,5 +300,6 @@ plt.title(f"Active={(portfolio_value[-1] / 1_000_000 - 1) * 100}%\n" +
           f"Passive={(portfolio_value_benchmark.values[-1] / 1_000_000 - 1) * 100}%")
 plt.plot(portfolio_value, label="Active")
 plt.plot(portfolio_value_benchmark_list, label="Passive")
-plt.legend()
 plt.show()
+
+plt.legend()

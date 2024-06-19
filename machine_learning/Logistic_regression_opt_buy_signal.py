@@ -1,9 +1,9 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.linear_model import LogisticRegression, LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix, mean_squared_error
+from sklearn.linear_model import LogisticRegression, LinearRegression
 import ta
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
@@ -24,7 +24,8 @@ list_of_equity = [
     "./data/btc_project_train.csv"
 ]
 
-def reading_files(list_of_files : str):
+
+def reading_files(list_of_files: str):
     """
     list of files is goint to be a list where all the files need
     to be written as a string
@@ -34,6 +35,7 @@ def reading_files(list_of_files : str):
     for file in list_of_files:
         dict_files[file] = pd.read_csv(file)
     return dict_files
+
 
 files = reading_files(list_of_equity)
 data = files["./data/aapl_project_train.csv"]
@@ -49,9 +51,12 @@ data_clean["Close_t5"] = data.loc[:, ["Close"]].shift(5)
 data_clean["rsi_10"] = ((ta.momentum.RSIIndicator(data["Close"], window=10)).rsi())
 data_clean["rsi_20"] = ((ta.momentum.RSIIndicator(data["Close"], window=20)).rsi())
 data_clean["rsi_30"] = ((ta.momentum.RSIIndicator(data["Close"], window=30)).rsi())
-data_clean["macd_10_24_7"] = ((ta.trend.MACD(close=data["Close"], window_slow=24, window_fast=10, window_sign=7)).macd())
-data_clean["macd_12_26_9"] = ((ta.trend.MACD(close=data_clean["Close"], window_slow=26, window_fast=12, window_sign=9)).macd())
-data_clean["macd_5_35_5"] = ((ta.trend.MACD(close=data_clean["Close"], window_slow=35, window_fast=5, window_sign=5)).macd())
+data_clean["macd_10_24_7"] = (
+    (ta.trend.MACD(close=data["Close"], window_slow=24, window_fast=10, window_sign=7)).macd())
+data_clean["macd_12_26_9"] = (
+    (ta.trend.MACD(close=data_clean["Close"], window_slow=26, window_fast=12, window_sign=9)).macd())
+data_clean["macd_5_35_5"] = (
+    (ta.trend.MACD(close=data_clean["Close"], window_slow=35, window_fast=5, window_sign=5)).macd())
 
 ### bollinger bands
 bollinger_20_2 = ta.volatility.BollingerBands(close=data_clean["Close"], window=20, window_dev=2)
@@ -80,6 +85,8 @@ df_with_nan = data_clas[columns_with_nan]
 df_with_nan
 
 from sklearn.metrics import confusion_matrix
+
+
 def calculate_confusion_matrix_metrics(model, X_train, y_train):
     y_pred = model.predict(X_train)
 
@@ -96,8 +103,11 @@ def calculate_confusion_matrix_metrics(model, X_train, y_train):
         "true_positives": true_positives,
         "false_positives": false_positives
     }
+
+
 def fpr(false_positives, true_negatives):
     return false_positives / (false_positives + true_negatives)
+
 
 data_clas["Y"] = data_clas.Close < data_clas.Close.shift(-1)
 
@@ -105,12 +115,12 @@ X_train, X_test, y_train, y_test = train_test_split(data_clas.drop("Y", axis=1),
                                                     data_clas.Y,
                                                     shuffle=False, test_size=0.2)
 
-classification_model = LogisticRegression().fit(X_train, y_train)
-logistic_pred = classification_model.predict(X_train)
-logistic_score = classification_model.score(X_train, y_train)
+log_r = LogisticRegression().fit(X_train, y_train)
+log_r_pred = log_r.predict(X_train)
+log_r_score = log_r.score(X_train, y_train)
 
-f1_score_logistic = f1_score(y_train, classification_model.predict(X_train))
-metrics_logistic = calculate_confusion_matrix_metrics(classification_model, X_train, y_train)
+f1_score_log_r = f1_score(y_train, log_r.predict(X_train))
+metrics_log_r = calculate_confusion_matrix_metrics(log_r, X_train, y_train)
 
 
 # Definir la función objetivo
@@ -125,7 +135,6 @@ def objective(trial):
 
     # Entrenar el modelo
     model.fit(X_train, y_train)
-
     # Evaluar el modelo
     y_pred = model.predict(X_test)
     # Calculate confusion matrix
@@ -137,10 +146,7 @@ def objective(trial):
     return fpr
 
 
-# Crear un objeto de estudio
 study = optuna.create_study(direction="minimize")
-
-# Ejecutar el proceso de optimización
 study.optimize(objective, n_trials=50)
 
 print("Best trial:", study.best_trial.number)
@@ -160,9 +166,12 @@ data_clean["Close_t5"] = data.loc[:, ["Close"]].shift(5)
 data_clean["rsi_10"] = ((ta.momentum.RSIIndicator(data["Close"], window=10)).rsi())
 data_clean["rsi_20"] = ((ta.momentum.RSIIndicator(data["Close"], window=20)).rsi())
 data_clean["rsi_30"] = ((ta.momentum.RSIIndicator(data["Close"], window=30)).rsi())
-data_clean["macd_10_24_7"] = ((ta.trend.MACD(close=data["Close"], window_slow=24, window_fast=10, window_sign=7)).macd())
-data_clean["macd_12_26_9"] = ((ta.trend.MACD(close=data_clean["Close"], window_slow=26, window_fast=12, window_sign=9)).macd())
-data_clean["macd_5_35_5"] = ((ta.trend.MACD(close=data_clean["Close"], window_slow=35, window_fast=5, window_sign=5)).macd())
+data_clean["macd_10_24_7"] = (
+    (ta.trend.MACD(close=data["Close"], window_slow=24, window_fast=10, window_sign=7)).macd())
+data_clean["macd_12_26_9"] = (
+    (ta.trend.MACD(close=data_clean["Close"], window_slow=26, window_fast=12, window_sign=9)).macd())
+data_clean["macd_5_35_5"] = (
+    (ta.trend.MACD(close=data_clean["Close"], window_slow=35, window_fast=5, window_sign=5)).macd())
 
 ### bollinger bands
 bollinger_20_2 = ta.volatility.BollingerBands(close=data_clean["Close"], window=20, window_dev=2)
@@ -189,11 +198,13 @@ columns_with_nan = data_clas.columns[data_clas.isna().any()].tolist()
 # Crear un nuevo DataFrame solo con las columnas filtradas
 df_with_nan = data_clas[columns_with_nan]
 
-data_clas["Y"] = data_clas.Close < data_clas.Close.shift(-20)
+data_clas["Y"] = data_clas.Close < data_clas.Close.shift(-15)
 
 X_train_t, X_test_t, y_train_t, y_test_t = train_test_split(data_clas.drop("Y", axis=1),
-                                                    data_clas.Y,
-                                                    shuffle=False, test_size=0.2)
+                                                            data_clas.Y,
+                                                            shuffle=False, test_size=0.2)
+
+
 def model_y(best_params):
     model = LogisticRegression(**best_params)
     model.fit(X_train, y_train)
@@ -202,13 +213,17 @@ def model_y(best_params):
     trading_df['BUY_SIGNAL'] = signals
     return trading_df
 
+
+# x = model_y(study.best_params)
 x = model_y(study.best_params)
 df_buysignals = x[['Close', 'BUY_SIGNAL']]
 
+print("###############################################")
+print("Trading signals:", sum(df_buysignals['BUY_SIGNAL']))
 capital = 1_000_000
-n_shares = 120
-stop_loss = 0.02
-take_profit = 0.02
+n_shares = 100
+stop_loss = 0.05
+take_profit = 0.05
 
 COM = 0.125 / 100
 
@@ -223,10 +238,12 @@ for i, row in df_buysignals.iterrows():
             # LOSS
             capital += row.Close * pos["n_shares"] * (1 - COM)
             active_positions.remove(pos)
+            print("Closing position,", capital, len(active_positions))
         elif row.Close > pos["take_profit"]:
             # PROFIT
             capital += row.Close * pos["n_shares"] * (1 - COM)
             active_positions.remove(pos)
+            print("Closing position,", capital, len(active_positions))
 
     # Check if trading signal is True
     if row['BUY_SIGNAL']:
@@ -264,17 +281,17 @@ plt.grid(True)
 
 capital_benchmark = 1_000_000
 shares_to_buy = capital_benchmark // (df_buysignals.Close.values[0] * (1 + COM))
-capital_benchmark -= shares_to_buy * row.Close * (1 + COM)
+capital_benchmark -= shares_to_buy * df_buysignals.Close.values[0] * (1 + COM)
 portfolio_value_benchmark = (shares_to_buy * df_buysignals.Close) + capital_benchmark
 portfolio_value_benchmark_list = portfolio_value_benchmark.tolist()
 
-
-plt.title(f"Active={(portfolio_value[-1] / 1_000_000 - 1)*100}%\n" +
-f"Passive={(portfolio_value_benchmark.values[-1] / 1_000_000 - 1)*100}%")
+plt.title(f"Active={(portfolio_value[-1] / 1_000_000 - 1) * 100}%\n" +
+          f"Passive={(portfolio_value_benchmark.values[-1] / 1_000_000 - 1) * 100}%")
 plt.plot(portfolio_value, label="Active")
 plt.plot(portfolio_value_benchmark_list, label="Passive")
-plt.legend()
 plt.show()
+
+plt.legend()
 
 
 
