@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix, mean_squared_error
+from sklearn.linear_model import LogisticRegression, LinearRegression
 import ta
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
@@ -37,7 +38,7 @@ def reading_files(list_of_files: str):
 
 
 files = reading_files(list_of_equity)
-data = files["./data/aapl_project_1m_train.csv"]
+data = files["./data/btc_project_train.csv"]
 data.head()
 
 data_clean = data.loc[:, ["Close"]]
@@ -114,33 +115,23 @@ X_train, X_test, y_train, y_test = train_test_split(data_clas.drop("Y", axis=1),
                                                     data_clas.Y,
                                                     shuffle=False, test_size=0.2)
 
-xgb = XGBClassifier().fit(X_train, y_train)
-xgb_pred = xgb.predict(X_train)
-xgb_score = xgb.score(X_train, y_train)
+log_r = LogisticRegression().fit(X_train, y_train)
+log_r_pred = log_r.predict(X_train)
+log_r_score = log_r.score(X_train, y_train)
 
-f1_score_xgb = f1_score(y_train, xgb.predict(X_train))
-metrics_xgb = calculate_confusion_matrix_metrics(xgb, X_train, y_train)
+f1_score_log_r = f1_score(y_train, log_r.predict(X_train))
+metrics_log_r = calculate_confusion_matrix_metrics(log_r, X_train, y_train)
 
 
 # Definir la función objetivo
 def objective(trial):
-    n_estimators = trial.suggest_int('n_estimators', 50, 200)
-    max_depth = trial.suggest_int('max_depth', 3, 10)
-    max_leaves = trial.suggest_int('max_leaves', 0, 10)
-    learning_rate = trial.suggest_loguniform('learning_rate', 1e-4, 1e-1)
-    booster = trial.suggest_categorical('booster', ['gbtree', 'gblinear', 'dart'])
-    gamma = trial.suggest_loguniform('gamma', 1e-8, 1.0)
-    reg_lambda = trial.suggest_loguniform('reg_lambda', 1e-8, 1.0)
+    #     # Definir el rango de valores para los hiperparámetros
+    C = trial.suggest_float('C', 1e-10, 1e10, log=True)
+    fit_intercept = trial.suggest_categorical('fit_intercept', [True, False])
+    l1_ratio = trial.suggest_uniform('l1_ratio', 0, 1)
 
     # Crear el modelo SVC
-    model = XGBClassifier(
-        n_estimators=n_estimators,
-        max_depth=max_depth,
-        max_leaves=max_leaves,
-        learning_rate=learning_rate,
-        booster=booster,
-        gamma=gamma,
-        reg_lambda=reg_lambda)
+    model = LogisticRegression(C=C, fit_intercept=fit_intercept, l1_ratio=l1_ratio)
 
     # Entrenar el modelo
     model.fit(X_train, y_train)
@@ -163,7 +154,7 @@ print("Best value:", study.best_trial.value)
 print("Best hyperparameters:", study.best_params)
 
 files = reading_files(list_of_equity)
-data = files["./data/aapl_project_1m_test.csv"]
+data = files["./data/btc_project_test.csv"]
 
 data_clean = data.loc[:, ["Close"]]
 data_clean["Y"] = data_clean.shift(-15)
@@ -215,7 +206,7 @@ X_train_t, X_test_t, y_train_t, y_test_t = train_test_split(data_clas.drop("Y", 
 
 
 def model_y(best_params):
-    model = XGBClassifier(**best_params)
+    model = LogisticRegression(**best_params)
     model.fit(X_train, y_train)
     signals = model.predict(X_test_t)
     trading_df = X_test_t.copy()
@@ -223,15 +214,14 @@ def model_y(best_params):
     return trading_df
 
 
+# x = model_y(study.best_params)
 x = model_y(study.best_params)
-#x = model_y(
-#    {'C': 6.66, 'kernel': 'linear', 'gamma': 9.50})
 df_buysignals = x[['Close', 'BUY_SIGNAL']]
 
 print("###############################################")
 print("Trading signals:", sum(df_buysignals['BUY_SIGNAL']))
 capital = 1_000_000
-n_shares = 100
+n_shares = 115
 stop_loss = 0.05
 take_profit = 0.05
 
@@ -302,3 +292,15 @@ plt.plot(portfolio_value_benchmark_list, label="Passive")
 plt.show()
 
 plt.legend()
+
+
+
+
+
+
+
+
+
+
+
+
