@@ -12,6 +12,32 @@ from xgboost import XGBClassifier
 from sklearn.metrics import f1_score
 from sklearn.metrics import accuracy_score
 
+list_of_equity = [
+    "./data/aapl_5m_train.csv",
+    "./data/aapl_project_1m_test.csv",
+    "./data/aapl_project_1m_train.csv",
+    "./data/aapl_project_test.csv",
+    "./data/aapl_project_train.csv",
+    "./data/btc_project_1m_test.csv",
+    "./data/btc_project_1m_train.csv",
+    "./data/btc_project_test.csv",
+    "./data/btc_project_train.csv"
+]
+
+
+def reading_files(list_of_files: str):
+    """
+    list of files is going to be a list where all the files need
+    to be written as a string
+    """
+
+    dict_files = dict()
+    for file in list_of_files:
+        dict_files[file] = pd.read_csv(file)
+    return dict_files
+
+
+files = reading_files(list_of_equity)
 
 data = pd.read_csv("./data/aapl_project_train.csv").dropna()
 
@@ -93,10 +119,8 @@ def objective(trial):
 #
 # # Ejecutar el proceso de optimización
 # study.optimize(objective, n_trials=30)
-
-# Mostrar los mejores parámetros
-# saved_study = optuna.load_study(study_name=study, storage=storage_url)
-# storage_url = "sqlite:///example.db"
+#
+# # Mostrar los mejores parámetros
 # print("Best trial:", study.best_trial.number)
 # print("Best value:", study.best_trial.value)
 # print("Best hyperparameters:", study.best_params)
@@ -146,7 +170,7 @@ columns_with_nan = data_clas.columns[data_clas.isna().any()].tolist()
 # Crear un nuevo DataFrame solo con las columnas filtradas
 df_with_nan = data_clas[columns_with_nan]
 
-data_clas["Y"] = data_clas.Close < data_clas.Close.shift(-15)
+data_clas["Y"] = data_clas.Close > data_clas.Close.shift(-15)
 
 X_train_t, X_test_t, y_train_t, y_test_t = train_test_split(data_clas.drop("Y", axis=1),
                                                             data_clas.Y,
@@ -162,10 +186,8 @@ def model_y(best_params):
     return trading_df
 
 
-# x = model_y(study.best_params)
 x = model_y(
-    {'n_estimators': 154, 'max_depth': 10, 'max_leaves': 0, 'learning_rate':  0.00022229302892736756, 'booster': 'gblinear',
-     'gamma': 0.003238246036109848, 'reg_lambda': 0.9390073803928757})
+    {'C': 4.078308765656782, 'kernel': 'linear', 'gamma': 1.02657882968666})
 df_sellsignals = x[['Close', 'SELL_SIGNAL']]
 
 print("###############################################")
