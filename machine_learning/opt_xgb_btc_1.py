@@ -76,51 +76,11 @@ data_clean = data_clean.dropna()
 
 data_clas = data_clean.drop("Y", axis=1).copy()
 
-# Filtrar solo las columnas que contienen al menos un valor NaN
-columns_with_nan = data_clas.columns[data_clas.isna().any()].tolist()
-
-# Crear un nuevo DataFrame solo con las columnas filtradas
-df_with_nan = data_clas[columns_with_nan]
-df_with_nan
-
-from sklearn.metrics import confusion_matrix
-
-
-def calculate_confusion_matrix_metrics(model, X_train, y_train):
-    y_pred = model.predict(X_train)
-
-    mat = confusion_matrix(y_train, y_pred)
-    true_negatives = mat[0, 0]
-    false_negatives = mat[1, 0]
-    true_positives = mat[1, 1]
-    false_positives = mat[0, 1]
-
-    return {
-        "confusion_matrix": mat,
-        "true_negatives": true_negatives,
-        "false_negatives": false_negatives,
-        "true_positives": true_positives,
-        "false_positives": false_positives
-    }
-
-
-def fpr(false_positives, true_negatives):
-    return false_positives / (false_positives + true_negatives)
-
-
 data_clas["Y"] = data_clas.Close < data_clas.Close.shift(-15)
 
 X_train, X_test, y_train, y_test = train_test_split(data_clas.drop("Y", axis=1),
                                                     data_clas.Y,
                                                     shuffle=False, test_size=0.2)
-
-xgb = XGBClassifier().fit(X_train, y_train)
-xgb_pred = xgb.predict(X_train)
-xgb_score = xgb.score(X_train, y_train)
-
-f1_score_xgb = f1_score(y_train, xgb.predict(X_train))
-metrics_xgb = calculate_confusion_matrix_metrics(xgb, X_train, y_train)
-
 
 # Definir la función objetivo
 def objective(trial):
