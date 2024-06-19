@@ -221,7 +221,7 @@ df_buysignals = x[['Close', 'BUY_SIGNAL']]
 print("###############################################")
 print("Trading signals:", sum(df_buysignals['BUY_SIGNAL']))
 capital = 1_000_000
-n_shares = 100
+n_shares = 115
 stop_loss = 0.05
 take_profit = 0.05
 

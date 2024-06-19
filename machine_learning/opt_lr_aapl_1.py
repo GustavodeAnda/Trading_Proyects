@@ -109,7 +109,7 @@ def fpr(false_positives, true_negatives):
     return false_positives / (false_positives + true_negatives)
 
 
-data_clas["Y"] = data_clas.Close < data_clas.Close.shift(-1)
+data_clas["Y"] = data_clas.Close < data_clas.Close.shift(-10)
 
 X_train, X_test, y_train, y_test = train_test_split(data_clas.drop("Y", axis=1),
                                                     data_clas.Y,
@@ -221,7 +221,7 @@ df_buysignals = x[['Close', 'BUY_SIGNAL']]
 print("###############################################")
 print("Trading signals:", sum(df_buysignals['BUY_SIGNAL']))
 capital = 1_000_000
-n_shares = 4
+n_shares = 115
 stop_loss = 0.05
 take_profit = 0.05
 

@@ -108,7 +108,7 @@ def fpr(false_positives, true_negatives):
     return false_positives / (false_positives + true_negatives)
 
 
-data_clas["Y"] = data_clas.Close < data_clas.Close.shift(-1)
+data_clas["Y"] = data_clas.Close < data_clas.Close.shift(-15)
 
 X_train, X_test, y_train, y_test = train_test_split(data_clas.drop("Y", axis=1),
                                                     data_clas.Y,
@@ -156,7 +156,7 @@ def objective(trial):
 
 
 study = optuna.create_study(direction="minimize")
-study.optimize(objective, n_trials=10)
+study.optimize(objective, n_trials=50)
 
 print("Best trial:", study.best_trial.number)
 print("Best value:", study.best_trial.value)
@@ -224,6 +224,7 @@ def model_y(best_params):
 
 
 x = model_y(study.best_params)
+#x = model_y(
 #    {'n_estimators': 145, 'max_depth': 4, 'max_leaves': 9, 'learning_rate': 0.09734559639741085, 'booster': 'dart',
 #     'gamma': 2.787331037777771e-07, 'reg_lambda': 6.9741950464194356e-06})
 df_buysignals = x[['Close', 'BUY_SIGNAL']]
