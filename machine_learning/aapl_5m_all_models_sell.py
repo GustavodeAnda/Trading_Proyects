@@ -125,7 +125,7 @@ X_train_t, X_test_t, y_train_t, y_test_t = train_test_split(data_clas.drop("Y", 
 
 def model_y():
     classification_model = LogisticRegression().fit(X_train, y_train)
-    svc = SVC(C=500, max_iter=100_000, probability=True).fit(X_train, y_train)
+    svc = SVC(C=500, max_iter=10_000, probability=True).fit(X_train, y_train)
     xgb = XGBClassifier().fit(X_train, y_train)
 
     ensemble_model = VotingClassifier(estimators=[
