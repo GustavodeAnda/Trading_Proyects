@@ -144,12 +144,12 @@ def objective(trial):
     return fpr
 
 
-study = optuna.create_study(direction="minimize")
-study.optimize(objective, n_trials=50)
+#study = optuna.create_study(direction="minimize")
+#study.optimize(objective, n_trials=50)
 
-print("Best trial:", study.best_trial.number)
-print("Best value:", study.best_trial.value)
-print("Best hyperparameters:", study.best_params)
+#print("Best trial:", study.best_trial.number)
+#print("Best value:", study.best_trial.value)
+#print("Best hyperparameters:", study.best_params)
 
 files = reading_files(list_of_equity)
 data = files["./data/aapl_project_test.csv"]
@@ -212,9 +212,9 @@ def model_y(best_params):
     return trading_df
 
 
-x = model_y(study.best_params)
-#x = model_y(
-#    {'C': 6.66, 'kernel': 'linear', 'gamma': 9.50})
+#x = model_y(study.best_params)
+x = model_y(
+    {'C': 10.406538336390442, 'kernel': 'poly', 'gamma': 0.08926398824211872})
 df_buysignals = x[['Close', 'BUY_SIGNAL']]
 
 print("###############################################")
