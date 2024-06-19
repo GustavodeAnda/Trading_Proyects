@@ -77,40 +77,39 @@ columns_with_nan = data_clas.columns[data_clas.isna().any()].tolist()
 
 # Crear un nuevo DataFrame solo con las columnas filtradas
 df_with_nan = data_clas[columns_with_nan]
-df_with_nan
 
-from sklearn.metrics import confusion_matrix
-def calculate_confusion_matrix_metrics(model, X_train, y_train):
-    y_pred = model.predict(X_train)
+# from sklearn.metrics import confusion_matrix
+# def calculate_confusion_matrix_metrics(model, X_train, y_train):
+#     y_pred = model.predict(X_train)
+#
+#     mat = confusion_matrix(y_train, y_pred)
+#     true_negatives = mat[0, 0]
+#     false_negatives = mat[1, 0]
+#     true_positives = mat[1, 1]
+#     false_positives = mat[0, 1]
+#
+#     return {
+#         "confusion_matrix": mat,
+#         "true_negatives": true_negatives,
+#         "false_negatives": false_negatives,
+#         "true_positives": true_positives,
+#         "false_positives": false_positives
+#     }
+# def fpr(false_positives, true_negatives):
+#     return false_positives / (false_positives + true_negatives)
 
-    mat = confusion_matrix(y_train, y_pred)
-    true_negatives = mat[0, 0]
-    false_negatives = mat[1, 0]
-    true_positives = mat[1, 1]
-    false_positives = mat[0, 1]
-
-    return {
-        "confusion_matrix": mat,
-        "true_negatives": true_negatives,
-        "false_negatives": false_negatives,
-        "true_positives": true_positives,
-        "false_positives": false_positives
-    }
-def fpr(false_positives, true_negatives):
-    return false_positives / (false_positives + true_negatives)
-
-data_clas["Y"] = data_clas.Close > data_clas.Close.shift(-1)
+data_clas["Y"] = data_clas.Close > data_clas.Close.shift(-15)
 
 X_train, X_test, y_train, y_test = train_test_split(data_clas.drop("Y", axis=1),
                                                     data_clas.Y,
                                                     shuffle=False, test_size=0.2)
 
-classification_model = LogisticRegression().fit(X_train, y_train)
-logistic_pred = classification_model.predict(X_train)
-logistic_score = classification_model.score(X_train, y_train)
-
-f1_score_logistic = f1_score(y_train, classification_model.predict(X_train))
-metrics_logistic = calculate_confusion_matrix_metrics(classification_model, X_train, y_train)
+# classification_model = LogisticRegression().fit(X_train, y_train)
+# logistic_pred = classification_model.predict(X_train)
+# logistic_score = classification_model.score(X_train, y_train)
+#
+# f1_score_logistic = f1_score(y_train, classification_model.predict(X_train))
+# metrics_logistic = calculate_confusion_matrix_metrics(classification_model, X_train, y_train)
 
 
 # Definir la función objetivo
@@ -137,16 +136,15 @@ def objective(trial):
     return fpr
 
 
-# Crear un objeto de estudio
-study = optuna.create_study(direction="minimize")
-
-# Ejecutar el proceso de optimización
-study.optimize(objective, n_trials=50)
-
-print("Best trial:", study.best_trial.number)
-print("Best value:", study.best_trial.value)
-print("Best hyperparameters:", study.best_params)
-study.best_params
+# # Crear un objeto de estudio
+# study = optuna.create_study(direction="minimize")
+#
+# # Ejecutar el proceso de optimización
+# study.optimize(objective, n_trials=50)
+#
+# print("Best trial:", study.best_trial.number)
+# print("Best value:", study.best_trial.value)
+# print("Best hyperparameters:", study.best_params)
 
 files = reading_files(list_of_equity)
 data = files["./data/aapl_project_test.csv"]
@@ -200,88 +198,85 @@ def model_y(best_params):
     model.fit(X_train, y_train)
     signals = model.predict(X_test_t)
     trading_df = X_test_t.copy()
-    trading_df['BUY_SIGNAL'] = signals
+    trading_df['SELL_SIGNAL'] = signals
     return trading_df
 
-x = model_y(study.best_params)
-df_buysignals = x[['Close', 'BUY_SIGNAL']]
+x = model_y(
+    {'C': 145, 'fit_intercept': False, 'l1_ratio': 0.9475016449857})
+df_sellsignals = x[['Close', 'SELL_SIGNAL']]
+
+print("###############################################")
+print("Trading signals:", sum(df_sellsignals['SELL_SIGNAL']))
+
 
 capital = 1_000_000
-n_shares = 120
-stop_loss = 0.02
-take_profit = 0.02
-
+n_shares = 55
+stop_loss = 0.95
+take_profit = 0.95
 COM = 0.125 / 100
 
 active_positions = []
 portfolio_value = [capital]
 
-for i, row in df_buysignals.iterrows():
-    # Close all positions that are above/under tp or sl
+for i, row in df_sellsignals.iterrows():
+    # Cerrar todas las posiciones que han alcanzado el stop loss o el take profit
     active_pos_copy = active_positions.copy()
     for pos in active_pos_copy:
-        if row.Close > pos["stop_loss"]:
-            # LOSS
-            capital += row.Close * pos["n_shares"] * (1 - COM)
+        if row.Close > pos["stop_loss"]:  # La posición se cierra con pérdida
+            capital += (pos["sold_at"] - row.Close) * pos["n_shares"] * (1 - COM)
             active_positions.remove(pos)
-        elif row.Close < pos["take_profit"]:
-            # PROFIT
-            capital += row.Close * pos["n_shares"] * (1 - COM)
+        elif row.Close < pos["take_profit"]:  # La posición se cierra con ganancia
+            capital += (pos["sold_at"] - row.Close) * pos["n_shares"] * (1 - COM)
             active_positions.remove(pos)
 
-    # Check if trading signal is True
-    if row['BUY_SIGNAL']:
-        # Check if we have enough cash
-        if capital < row.Close * (1 + COM) * n_shares:
-            capital -= row.Close * (1 + COM) * n_shares
+    # Verificar si hay señal de venta
+    if row.SELL_SIGNAL:
+        # Verificar si tenemos suficientes acciones para vender
+        if (capital > row.Close * (1 + COM) * n_shares * 1.1) and len(active_positions) < 1000:
+            capital -= row.Close * (COM) * n_shares
             active_positions.append({
-                "type": "LONG",
-                "bought_at": row.Close,
+                "type": "SHORT",
+                "sold_at": row.Close,
                 "n_shares": n_shares,
-                "stop_loss": row.Close * (1 - stop_loss),
-                "take_profit": row.Close * (1 + take_profit)
+                "stop_loss": row.Close * (1 + stop_loss),
+                "take_profit": row.Close * (1 - take_profit)
             })
         else:
             print("OUT OF CASH")
 
-    # Portfolio value through time
-    positions_value = sum([p["n_shares"] * row.Close for p in active_positions])
+    # Valor del portafolio a través del tiempo
+    positions_value = sum([(pos["sold_at"] - row.Close) * pos["n_shares"] for pos in active_positions])
     portfolio_value.append(capital + positions_value)
 
-# Close all positions that are above/under tp or sl
-for pos in active_positions:
-    capital += df_buysignals.iloc[-1].Close * pos["n_shares"] * (1 - COM)
+# Cerrar todas las posiciones restantes al final
+for pos in active_positions.copy():
+    capital += (pos["sold_at"] - row.Close) * pos["n_shares"] * (1 - COM)
+    active_positions.remove(pos)
 
 portfolio_value.append(capital)
+
 
 # Graficar el valor del portafolio
 plt.figure(figsize=(12, 6))
 plt.plot(portfolio_value)
 plt.xlabel('Período de Tiempo')
 plt.ylabel('Valor del Portafolio')
-plt.title('Evolución del Valor del Portafolio Basado en Señales de Compra')
+plt.title('Evolución del Valor del Portafolio Basado en Señales de Venta')
 plt.legend()
 plt.grid(True)
-plt.show()
 
 capital_benchmark = 1_000_000
-shares_to_buy = capital_benchmark // (df_buysignals.Close.values[0] * (1 + COM))
-capital_benchmark -= shares_to_buy * row.Close * (1 + COM)
-portfolio_value_benchmark = (shares_to_buy * df_buysignals.Close) + capital_benchmark
+shares_to_buy = capital_benchmark // (df_sellsignals.Close.values[0] * (1 + COM))
+capital_benchmark -= shares_to_buy * df_sellsignals.Close.values[0] * (1 + COM)
+portfolio_value_benchmark = (shares_to_buy * df_sellsignals.Close) + capital_benchmark
 portfolio_value_benchmark_list = portfolio_value_benchmark.tolist()
 
-
-plt.title(f"Active={(portfolio_value[-1] / 1_000_000 - 1)*100}%\n" +
-f"Passive={(portfolio_value_benchmark.values[-1] / 1_000_000 - 1)*100}%")
+plt.title(f"Active={(portfolio_value[-1] / 1_000_000 - 1) * 100}%\n" +
+          f"Passive={(portfolio_value_benchmark.values[-1] / 1_000_000 - 1) * 100}%")
 plt.plot(portfolio_value, label="Active")
 plt.plot(portfolio_value_benchmark_list, label="Passive")
 plt.legend()
 plt.show()
-print(df_buysignals)
-
-
-
-
 
 
 

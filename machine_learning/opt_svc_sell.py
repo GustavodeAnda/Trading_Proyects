@@ -57,7 +57,7 @@ data_clas = data_clean.drop("Y", axis=1).copy()
 data_clas.head()
 
 ### esto que esta haciendo?
-data_clas["Y"] = data_clas.Close < data_clas.Close.shift(-1)
+data_clas["Y"] = data_clas.Close > data_clas.Close.shift(-1)
 
 X_train, X_test, y_train, y_test = train_test_split(data_clas.drop("Y", axis=1),
                                                     data_clas.Y,
@@ -88,18 +88,18 @@ def objective(trial):
     return fpr
 
 
-# Crear un objeto de estudio
-study = optuna.create_study(direction="minimize")
-
-# Ejecutar el proceso de optimización
-study.optimize(objective, n_trials=30)
+# # Crear un objeto de estudio
+# study = optuna.create_study(direction="minimize")
+#
+# # Ejecutar el proceso de optimización
+# study.optimize(objective, n_trials=30)
 
 # Mostrar los mejores parámetros
 # saved_study = optuna.load_study(study_name=study, storage=storage_url)
 # storage_url = "sqlite:///example.db"
-print("Best trial:", study.best_trial.number)
-print("Best value:", study.best_trial.value)
-print("Best hyperparameters:", study.best_params)
+# print("Best trial:", study.best_trial.number)
+# print("Best value:", study.best_trial.value)
+# print("Best hyperparameters:", study.best_params)
 
 files = reading_files(list_of_equity)
 data = files["./data/aapl_project_test.csv"]
@@ -158,18 +158,18 @@ def model_y(best_params):
     model.fit(X_train, y_train)
     signals = model.predict(X_test_t)
     trading_df = X_test_t.copy()
-    trading_df['BUY_SIGNAL'] = signals
+    trading_df['SELL_SIGNAL'] = signals
     return trading_df
 
 
 # x = model_y(study.best_params)
 x = model_y(
-    {'n_estimators': 145, 'max_depth': 4, 'max_leaves': 9, 'learning_rate': 0.09734559639741085, 'booster': 'dart',
-     'gamma': 2.787331037777771e-07, 'reg_lambda': 6.9741950464194356e-06})
-df_buysignals = x[['Close', 'BUY_SIGNAL']]
+    {'n_estimators': 154, 'max_depth': 10, 'max_leaves': 0, 'learning_rate':  0.00022229302892736756, 'booster': 'gblinear',
+     'gamma': 0.003238246036109848, 'reg_lambda': 0.9390073803928757})
+df_sellsignals = x[['Close', 'SELL_SIGNAL']]
 
 print("###############################################")
-print("Trading signals:", sum(df_buysignals['BUY_SIGNAL']))
+print("Trading signals:", sum(df_sellsignals['SELL_SIGNAL']))
 
 capital = 1_000_000
 n_shares = 100
@@ -180,7 +180,7 @@ COM = 0.125 / 100
 active_positions = []
 portfolio_value = [capital]
 
-for i, row in technical_data.iterrows():
+for i, row in df_sellsignals.iterrows():
     # Cerrar todas las posiciones que han alcanzado el stop loss o el take profit
     active_pos_copy = active_positions.copy()
     for pos in active_pos_copy:
@@ -194,7 +194,7 @@ for i, row in technical_data.iterrows():
     # Verificar si hay señal de venta
     if row.SELL_SIGNAL:
         # Verificar si tenemos suficientes acciones para vender
-        if (capital > row.Close * (1 + COM) * n_shares * 1.5) and len(active_positions) < 1000:
+        if (capital > row.Close * (1 + COM) * n_shares * 1.2) and len(active_positions) < 1000:
             capital -= row.Close * (COM) * n_shares
             active_positions.append({
                 "type": "SHORT",
@@ -228,9 +228,9 @@ plt.legend()
 plt.grid(True)
 
 capital_benchmark = 1_000_000
-shares_to_buy = capital_benchmark // (df_buysignals.Close.values[0] * (1 + COM))
-capital_benchmark -= shares_to_buy * df_buysignals.Close.values[0] * (1 + COM)
-portfolio_value_benchmark = (shares_to_buy * df_buysignals.Close) + capital_benchmark
+shares_to_buy = capital_benchmark // (df_sellsignals.Close.values[0] * (1 + COM))
+capital_benchmark -= shares_to_buy * df_sellsignals.Close.values[0] * (1 + COM)
+portfolio_value_benchmark = (shares_to_buy * df_sellsignals.Close) + capital_benchmark
 portfolio_value_benchmark_list = portfolio_value_benchmark.tolist()
 
 plt.title(f"Active={(portfolio_value[-1] / 1_000_000 - 1) * 100}%\n" +
